@@ -358,6 +358,7 @@ async def show_contact(message: Message):
     await message.answer("📞 <b>MEATBOX.UZ bilan bog'lanish:</b>\n\n📱 <b>Call-markaz:</b> +998 (95) 113-53-53\n💬 <b>Telegram Admin:</b> @meatbox_admin", reply_markup=get_main_keyboard())
 
 from aiohttp import web
+import aiohttp
 
 async def handle_healthcheck(request):
     return web.Response(text="MEATBOX.UZ Telegram Bot is active and running 24/7 🚀")
@@ -371,7 +372,20 @@ async def start_web_server():
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    logging.info(f"🌐 Railway HTTP Healthcheck server listening on port {port}")
+    logging.info(f"🌐 Render/Railway HTTP Healthcheck server listening on port {port}")
+
+async def keep_alive_ping():
+    """Render serveri uyquga ketib qolmasligi uchun har 3 daqiqada avtomatik HTTP ping yuborish"""
+    render_url = os.getenv("RENDER_EXTERNAL_URL", "https://meatbox-uz.onrender.com/")
+    await asyncio.sleep(10)
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                async with session.get(render_url) as resp:
+                    logging.info(f"⏰ Render Keep-Alive ping status: {resp.status}")
+            except Exception as e:
+                logging.error(f"Keep-Alive ping error: {e}")
+            await asyncio.sleep(180)
 
 async def main():
     if not bot:
@@ -380,8 +394,9 @@ async def main():
     
     try:
         asyncio.create_task(start_web_server())
+        asyncio.create_task(keep_alive_ping())
     except Exception as e:
-        logging.error(f"HTTP healthcheck server xatosi: {e}")
+        logging.error(f"HTTP healthcheck / Keep-alive server xatosi: {e}")
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
