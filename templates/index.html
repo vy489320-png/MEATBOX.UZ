@@ -9,21 +9,35 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-main: #0D0D11;
-            --bg-card: #16161E;
-            --bg-card-hover: #1F1F2A;
-            --primary: #9E0000;
-            --primary-grad: linear-gradient(135deg, #B80000 0%, #7A0000 100%);
-            --gold: #FFD700;
-            --gold-grad: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            --bg-dark: #0A0A0E;
+            --bg-card: rgba(22, 22, 30, 0.75);
+            --bg-card-solid: #16161E;
+            --bg-input: rgba(255, 255, 255, 0.05);
+            
+            --ruby-primary: #C90B0B;
+            --ruby-dark: #7A0404;
+            --ruby-grad: linear-gradient(135deg, #E50914 0%, #9B0000 100%);
+            
+            --gold-primary: #FFD700;
+            --gold-light: #FFE566;
+            --gold-grad: linear-gradient(135deg, #FFD700 0%, #FFA800 100%);
+            
             --text-main: #FFFFFF;
-            --text-muted: #9E9EA8;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --radius-lg: 16px;
+            --text-sub: #A0A0B0;
+            --text-muted: #6B6B7B;
+            
+            --border-glow: rgba(255, 215, 0, 0.2);
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            
+            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(201, 11, 11, 0.35);
+            
+            --radius-xl: 24px;
+            --radius-lg: 18px;
             --radius-md: 12px;
             --radius-sm: 8px;
         }
@@ -32,350 +46,585 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Outfit', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-main);
+            background-color: var(--bg-dark);
             color: var(--text-main);
-            padding-bottom: 100px;
+            padding-bottom: 110px;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(201, 11, 11, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
         }
 
-        /* HEADER SECTION */
+        /* HEADER & SEARCH BAR */
         .header {
-            background: linear-gradient(180deg, rgba(158, 0, 0, 0.25) 0%, rgba(13, 13, 17, 0) 100%);
-            padding: 16px 16px 8px 16px;
             position: sticky;
             top: 0;
-            z-index: 50;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            z-index: 100;
+            background: rgba(10, 10, 14, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 14px 16px 10px 16px;
         }
 
-        .brand-bar {
+        .top-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 12px;
         }
 
-        .logo-group {
+        .brand-logo {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            background: var(--primary-grad);
-            border-radius: 10px;
+        .logo-emblem {
+            width: 42px;
+            height: 42px;
+            background: var(--ruby-grad);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(158, 0, 0, 0.4);
+            font-size: 22px;
+            box-shadow: var(--shadow-glow);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        .brand-title {
-            font-size: 20px;
-            font-weight: 800;
+        .brand-name {
+            font-size: 22px;
+            font-weight: 900;
             letter-spacing: 0.5px;
             background: var(--gold-grad);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1;
         }
 
-        .brand-subtitle {
+        .brand-tagline {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-sub);
             font-weight: 500;
+            margin-top: 3px;
         }
 
-        .badge-delivery {
-            background: rgba(255, 215, 0, 0.12);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: var(--gold);
-            padding: 4px 10px;
+        .delivery-pill {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gold-primary);
         }
 
-        /* CATEGORIES TAB (STICKY) */
-        .categories-container {
+        /* SEARCH INPUT */
+        .search-box {
+            position: relative;
+            margin-top: 4px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            padding: 10px 16px 10px 42px;
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--gold-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* HERO SLIDER / BANNERS */
+        .hero-banner-slider {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 16px;
+            scrollbar-width: none;
+        }
+
+        .hero-banner-slider::-webkit-scrollbar { display: none; }
+
+        .banner-card {
+            min-width: 280px;
+            height: 125px;
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #800000 0%, #300000 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            flex-shrink: 0;
+        }
+
+        .banner-card:nth-child(2) {
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .banner-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #FFF;
+            margin-bottom: 4px;
+            z-index: 2;
+        }
+
+        .banner-subtitle {
+            font-size: 12px;
+            color: var(--gold-primary);
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .banner-badge {
+            display: inline-block;
+            background: var(--gold-grad);
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            width: fit-content;
+            margin-top: 8px;
+            z-index: 2;
+        }
+
+        .banner-emoji {
+            position: absolute;
+            right: -10px;
+            bottom: -15px;
+            font-size: 80px;
+            opacity: 0.25;
+            transform: rotate(-15deg);
+        }
+
+        /* CATEGORIES TABS */
+        .categories-bar {
             display: flex;
             gap: 8px;
             overflow-x: auto;
-            padding: 8px 16px;
+            padding: 4px 16px 12px 16px;
             scrollbar-width: none;
-            -ms-overflow-style: none;
         }
+        .categories-bar::-webkit-scrollbar { display: none; }
 
-        .categories-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat-btn {
+        .cat-chip {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-sub);
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 30px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .cat-btn.active {
-            background: var(--primary-grad);
-            color: #FFF;
-            border-color: transparent;
-            box-shadow: 0 4px 12px rgba(158, 0, 0, 0.3);
-        }
-
-        /* PRODUCT LIST */
-        .products-section {
-            padding: 12px 16px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 12px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
+        .cat-chip.active {
+            background: var(--ruby-grad);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(201, 11, 11, 0.4);
+            transform: translateY(-1px);
         }
 
-        .product-card {
+        /* PRODUCTS SECTION */
+        .products-container {
+            padding: 0 16px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+
+        .prod-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-subtle);
             border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
-        .product-card:active {
-            transform: scale(0.98);
+        .prod-card:active {
+            transform: scale(0.97);
         }
 
-        .product-img-wrapper {
+        .prod-thumb-box {
+            position: relative;
             width: 100%;
-            height: 120px;
-            position: relative;
-            background: #252530;
+            height: 135px;
+            background: #181822;
             overflow: hidden;
         }
 
-        .product-img {
+        .prod-thumb {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.4s ease;
         }
 
-        .tag-badge {
+        .prod-card:hover .prod-thumb {
+            transform: scale(1.08);
+        }
+
+        .prod-tag {
             position: absolute;
             top: 8px;
             left: 8px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            color: var(--gold);
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 6px;
+            background: rgba(10, 10, 14, 0.85);
             border: 1px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(6px);
+            color: var(--gold-primary);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
         }
 
-        .product-info {
-            padding: 10px;
+        .prod-content {
+            padding: 12px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+            justify-content: space-between;
         }
 
-        .product-name {
+        .prod-title {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 800;
+            line-height: 1.25;
             margin-bottom: 4px;
-            line-height: 1.2;
         }
 
-        .product-desc {
+        .prod-desc {
             font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.3;
-            margin-bottom: 10px;
+            color: var(--text-sub);
+            line-height: 1.35;
+            margin-bottom: 12px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .product-footer {
-            margin-top: auto;
+        .prod-bottom-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            gap: 4px;
+            margin-top: auto;
         }
 
-        .product-price {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--gold);
+        .prod-price {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--gold-primary);
+            letter-spacing: -0.2px;
         }
 
-        /* ADD / COUNTER BUTTONS */
-        .add-btn {
-            background: var(--primary-grad);
-            color: white;
+        /* BUTTONS */
+        .btn-add {
+            background: var(--ruby-grad);
+            color: #FFF;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: var(--radius-md);
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(158, 0, 0, 0.3);
+            box-shadow: 0 3px 10px rgba(201, 11, 11, 0.35);
             transition: all 0.2s ease;
         }
 
-        .counter-btn-group {
+        .btn-counter {
             display: flex;
             align-items: center;
             background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-md);
             padding: 2px;
         }
 
         .cnt-btn {
-            background: var(--primary);
-            color: white;
+            background: var(--ruby-primary);
+            color: #FFF;
             border: none;
             width: 26px;
             height: 26px;
             border-radius: 8px;
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
         }
 
-        .cnt-value {
+        .cnt-num {
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 800;
             padding: 0 8px;
             color: #FFF;
         }
 
-        /* FLOATING BOTTOM CART BAR */
-        .bottom-cart-bar {
+        /* FLOATING CART BAR */
+        .floating-cart {
             position: fixed;
-            bottom: 16px;
+            bottom: 20px;
             left: 16px;
             right: 16px;
             background: rgba(22, 22, 30, 0.95);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 20px;
-            padding: 10px 16px;
+            border: 1px solid var(--border-glow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.15);
             z-index: 100;
-            transform: translateY(120px);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(140px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .bottom-cart-bar.active {
+        .floating-cart.active {
             transform: translateY(0);
         }
 
-        .cart-bar-info {
+        .cart-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
-        .cart-icon-badge {
+        .cart-badge-icon {
             position: relative;
-            width: 40px;
-            height: 40px;
-            background: var(--primary-grad);
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            background: var(--ruby-grad);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
+            box-shadow: var(--shadow-glow);
         }
 
-        .badge-count {
+        .cart-badge-num {
             position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--gold);
+            top: -5px;
+            right: -5px;
+            background: var(--gold-primary);
             color: #000;
             font-size: 11px;
-            font-weight: 800;
-            width: 18px;
-            height: 18px;
+            font-weight: 900;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 2px solid #16161E;
         }
 
-        .cart-total-label {
+        .cart-price-title {
             font-size: 11px;
-            color: var(--text-muted);
+            color: var(--text-sub);
         }
 
-        .cart-total-price {
-            font-size: 15px;
-            font-weight: 800;
+        .cart-price-val {
+            font-size: 16px;
+            font-weight: 900;
             color: #FFF;
         }
 
-        .order-action-btn {
+        .btn-checkout {
             background: var(--gold-grad);
             color: #000;
             border: none;
-            padding: 10px 18px;
-            border-radius: var(--radius-md);
+            padding: 12px 20px;
+            border-radius: 14px;
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-            transition: transform 0.1s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            transition: transform 0.15 ease;
         }
 
-        .order-action-btn:active {
-            transform: scale(0.96);
+        .btn-checkout:active {
+            transform: scale(0.95);
+        }
+
+        /* MODAL POPUPS (PRODUCT DETAILS & CART) */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-height: 88vh;
+            background: #121218;
+            border-radius: 28px 28px 0 0;
+            border-top: 1px solid var(--border-glow);
+            padding: 24px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-backdrop.open .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .modal-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .modal-detail-text {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #FFF;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--gold-primary);
+        }
+
+        .modal-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFF;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 800;
+            margin-top: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -383,68 +632,114 @@
 
     <!-- HEADER -->
     <header class="header">
-        <div class="brand-bar">
-            <div class="logo-group">
-                <div class="logo-icon">🥩</div>
+        <div class="top-bar">
+            <div class="brand-logo">
+                <div class="logo-emblem">🥩</div>
                 <div>
-                    <div class="brand-title">MEATBOX.UZ</div>
-                    <div class="brand-subtitle">Premium Halol Go'shtlar</div>
+                    <div class="brand-name">MEATBOX.UZ</div>
+                    <div class="brand-tagline">Premium Go'shtlar & Steyklar</div>
                 </div>
             </div>
-            <div class="badge-delivery">
-                ⚡️ 45 daqiqa
+            <div class="delivery-pill">
+                ⚡️ 45 Daqiqa
             </div>
+        </div>
+
+        <!-- LIVE SEARCH -->
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Mahsulotlarni qidirish (masalan: Ribeye, BBQ)..." oninput="handleSearch()">
         </div>
     </header>
 
-    <!-- CATEGORIES -->
-    <div class="categories-container">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">🔥 Barchasi</button>
-        <button class="cat-btn" onclick="filterCategory('sets', this)">🥩 Setlar</button>
-        <button class="cat-btn" onclick="filterCategory('steaks', this)">🔪 Steyklar</button>
-        <button class="cat-btn" onclick="filterCategory('marinated', this)">🍢 Marinadlangan</button>
+    <!-- HERO PROMO BANNERS -->
+    <div class="hero-banner-slider">
+        <div class="banner-card">
+            <div class="banner-title">🥩 Premium Tomahawk Steyk</div>
+            <div class="banner-subtitle">Bugun 15% Maxsus Chegirmada!</div>
+            <div class="banner-badge">AKSIYA</div>
+            <div class="banner-emoji">🥩</div>
+        </div>
+        <div class="banner-card">
+            <div class="banner-title">🔥 BBQ Grill Box Toplam</div>
+            <div class="banner-subtitle">Bepul Maxsus Souslar Bilan</div>
+            <div class="banner-badge">TOP SALE</div>
+            <div class="banner-emoji">🔥</div>
+        </div>
     </div>
 
-    <!-- PRODUCTS SECTION -->
-    <main class="products-section">
-        <div class="section-title">
-            <span>🔥</span> Mashhur Mahsulotlar
+    <!-- CATEGORIES TABS -->
+    <div class="categories-bar">
+        <button class="cat-chip active" onclick="filterCategory('all', this)">🔥 Barchasi</button>
+        <button class="cat-chip" onclick="filterCategory('sets', this)">🥩 Setlar</button>
+        <button class="cat-chip" onclick="filterCategory('steaks', this)">🔪 Steyklar</button>
+        <button class="cat-chip" onclick="filterCategory('marinated', this)">🍢 Marinadlangan</button>
+    </div>
+
+    <!-- PRODUCTS GRID -->
+    <main class="products-container">
+        <div class="section-header">
+            <div class="section-title">
+                <span>🥩</span> Tanlangan Mahsulotlar
+            </div>
         </div>
-        <div class="product-grid" id="productGrid">
-            <!-- Dynamic products rendered via JS -->
+        <div class="products-grid" id="productGrid">
+            <!-- Rendered dynamically -->
         </div>
     </main>
 
     <!-- FLOATING CART BAR -->
-    <div class="bottom-cart-bar" id="cartBar">
-        <div class="cart-bar-info">
-            <div class="cart-icon-badge">
+    <div class="floating-cart" id="cartBar">
+        <div class="cart-info">
+            <div class="cart-badge-icon">
                 🛒
-                <span class="badge-count" id="cartBadge">0</span>
+                <span class="cart-badge-num" id="cartBadgeNum">0</span>
             </div>
             <div>
-                <div class="cart-total-label">Jami buyurtma:</div>
-                <div class="cart-total-price" id="cartTotalPrice">0 so'm</div>
+                <div class="cart-price-title">Jami to'lov:</div>
+                <div class="cart-price-val" id="cartPriceVal">0 so'm</div>
             </div>
         </div>
-        <button class="order-action-btn" onclick="sendOrderData()">
+        <button class="btn-checkout" onclick="openCartModal()">
             Buyurtma berish ➔
         </button>
     </div>
 
+    <!-- CART & CHECKOUT MODAL SHEET -->
+    <div class="modal-backdrop" id="cartModalBackdrop">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-title">🛒 Savatingiz</div>
+            
+            <div id="modalCartItemsList" style="margin-bottom: 20px;">
+                <!-- Cart items list dynamically rendered -->
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">📝 Buyurtmaga izoh (Ixtiyoriy):</label>
+                <input type="text" id="orderComment" class="form-input" placeholder="Masalan: Qovurg'ani 2 ga bo'lib bering...">
+            </div>
+
+            <button class="btn-checkout" style="width: 100%; justify-content: center; padding: 16px; font-size: 16px;" onclick="sendOrderToBot()">
+                ✅ Buyurtmani Telegramga yuborish
+            </button>
+            <button class="modal-close-btn" onclick="closeCartModal()">Yopish</button>
+        </div>
+    </div>
+
     <script>
-        // Telegram Web App Initialization
+        // Telegram Web App SDK init
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // PRODUCT DATA
+        // PRODUCTS DATABASE
         const productsData = [
             {
                 id: "set_1",
                 category: "sets",
                 name: "🥩 Premium Steak Set",
-                desc: "Ribeye 1kg, T-Bone 1kg, Tenderloin 0.5kg + Maxsus ziravorlar",
+                desc: "Ribeye 1kg, T-Bone 1kg, Tenderloin 0.5kg + Maxsus marinad va ziravorlar to'plami.",
                 price: 450000,
                 priceStr: "450 000 so'm",
                 tag: "TOP SALE",
@@ -454,17 +749,17 @@
                 id: "set_2",
                 category: "sets",
                 name: "🔥 BBQ Grill Box",
-                desc: "Marinadlangan qovurg'alar (2kg), kabob (2kg), nemis sosiskalari (1kg)",
+                desc: "Marinadlangan qovurg'alar (2kg), kabob (2kg), nemis sosiskalari (1kg).",
                 price: 380000,
                 priceStr: "380 000 so'm",
-                tag: "BBQ SET",
+                tag: "GRILL",
                 img: "images/bbq_ribs.jpg"
             },
             {
                 id: "set_3",
                 category: "sets",
                 name: "👨‍👩‍👧‍👦 Family Meat Box",
-                desc: "Mol go'shti lahza 2kg, Qo'y go'shti 2kg, Qiymasi 1kg",
+                desc: "Mol go'shti lahza 2kg, Qo'y go'shti 2kg, Qiymasi 1kg. Yangi va halol.",
                 price: 520000,
                 priceStr: "520 000 so'm",
                 tag: "OILAVIY",
@@ -474,7 +769,7 @@
                 id: "set_4",
                 category: "sets",
                 name: "🍔 Burger & Steak Combo",
-                desc: "Ribeye steyk (1kg), Burger kotletlari (8 dona), Maxsus sous",
+                desc: "Ribeye steyk (1kg), Burger kotletlari (8 dona), Maxsus sous.",
                 price: 320000,
                 priceStr: "320 000 so'm",
                 tag: "COMBO",
@@ -484,7 +779,7 @@
                 id: "steak_ribeye",
                 category: "steaks",
                 name: "🥩 Prime Ribeye Steak",
-                desc: "Juicy marble cut beef (1 kg / 3-4 dona steyk)",
+                desc: "Juicy marble cut beef (1 kg / 3-4 dona saralangan steyk bo'laklari).",
                 price: 190000,
                 priceStr: "190 000 so'm",
                 tag: "PREMIUM",
@@ -494,7 +789,7 @@
                 id: "steak_tomahawk",
                 category: "steaks",
                 name: "🪓 Tomahawk Steak",
-                desc: "Suyakli qirollik steyki (1.2 kg)",
+                desc: "Suyakli qirollik steyki (1.2 kg), ideal mramorlik darajasi.",
                 price: 240000,
                 priceStr: "240 000 so'm",
                 tag: "EXCLUSIVE",
@@ -504,17 +799,17 @@
                 id: "mar_ribs",
                 category: "marinated",
                 name: "🔥 Marinadlangan Qovurg'a",
-                desc: "Maxsus firmaniy sousda marinad qilingan mol qovurg'alari (1.5 kg)",
+                desc: "Maxsus firmaniy sousda marinad qilingan mol qovurg'alari (1.5 kg).",
                 price: 160000,
                 priceStr: "160 000 so'm",
-                tag: "GRILL",
+                tag: "BBQ",
                 img: "images/bbq_ribs.jpg"
             },
             {
                 id: "mar_shashlik",
                 category: "marinated",
                 name: "🍢 Shaslik uchun Marinad",
-                desc: "Piyoz, ziravorlar va zaytun moyi bilan tayyor (2 kg)",
+                desc: "Piyoz, ziravorlar va zaytun moyi bilan tayyor (2 kg).",
                 price: 195000,
                 priceStr: "195 000 so'm",
                 tag: "HALOL 100%",
@@ -522,35 +817,46 @@
             }
         ];
 
-        // Cart state: { productId: count }
         let cart = {};
+        let currentCategory = "all";
 
         // RENDER PRODUCTS
-        function renderProducts(filter = "all") {
+        function renderProducts(filter = "all", searchQuery = "") {
             const grid = document.getElementById("productGrid");
             grid.innerHTML = "";
 
-            const filtered = filter === "all" 
-                ? productsData 
-                : productsData.filter(p => p.category === filter);
+            let items = productsData;
+            
+            if (filter !== "all") {
+                items = items.filter(p => p.category === filter);
+            }
 
-            filtered.forEach(p => {
+            if (searchQuery.trim() !== "") {
+                const q = searchQuery.toLowerCase();
+                items = items.filter(p => p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+            }
+
+            if (items.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-sub); padding: 40px 0;">🔍 Mahsulot topilmadi</div>`;
+                return;
+            }
+
+            items.forEach(p => {
                 const count = cart[p.id] || 0;
-                
                 const card = document.createElement("div");
-                card.className = "product-card";
+                card.className = "prod-card";
                 
                 card.innerHTML = `
-                    <div class="product-img-wrapper">
-                        <img src="${p.img}" alt="${p.name}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80'">
-                        <span class="tag-badge">${p.tag}</span>
+                    <div class="prod-thumb-box">
+                        <img src="${p.img}" alt="${p.name}" class="prod-thumb" onerror="this.src='https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80'">
+                        <span class="prod-tag">${p.tag}</span>
                     </div>
-                    <div class="product-info">
-                        <div class="product-name">${p.name}</div>
-                        <div class="product-desc">${p.desc}</div>
-                        <div class="product-footer">
-                            <div class="product-price">${p.priceStr}</div>
-                            <div id="action-${p.id}">
+                    <div class="prod-content">
+                        <div class="prod-title">${p.name}</div>
+                        <div class="prod-desc">${p.desc}</div>
+                        <div class="prod-bottom-row">
+                            <div class="prod-price">${p.priceStr}</div>
+                            <div id="btn-group-${p.id}">
                                 ${renderButtonHTML(p.id, count)}
                             </div>
                         </div>
@@ -562,61 +868,58 @@
 
         function renderButtonHTML(id, count) {
             if (count === 0) {
-                return `<button class="add-btn" onclick="updateCart('${id}', 1)">+ Qo'shish</button>`;
+                return `<button class="btn-add" onclick="updateCart('${id}', 1)">+ Qo'shish</button>`;
             }
             return `
-                <div class="counter-btn-group">
+                <div class="btn-counter">
                     <button class="cnt-btn" onclick="updateCart('${id}', -1)">-</button>
-                    <span class="cnt-value">${count}</span>
+                    <span class="cnt-num">${count}</span>
                     <button class="cnt-btn" onclick="updateCart('${id}', 1)">+</button>
                 </div>
             `;
         }
 
         function updateCart(id, delta) {
-            const currentCount = cart[id] || 0;
-            const newCount = currentCount + delta;
+            const current = cart[id] || 0;
+            const updated = current + delta;
 
-            if (newCount <= 0) {
+            if (updated <= 0) {
                 delete cart[id];
             } else {
-                cart[id] = newCount;
+                cart[id] = updated;
             }
 
-            // Update product card button HTML
-            const actionContainer = document.getElementById(`action-${id}`);
-            if (actionContainer) {
-                actionContainer.innerHTML = renderButtonHTML(id, cart[id] || 0);
+            const btnContainer = document.getElementById(`btn-group-${id}`);
+            if (btnContainer) {
+                btnContainer.innerHTML = renderButtonHTML(id, cart[id] || 0);
             }
 
-            // Update floating cart bar
-            updateCartBar();
-            
-            // Haptic Feedback for Telegram
+            updateFloatingCart();
+
             if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred("light");
+                tg.HapticFeedback.impactOccurred("medium");
             }
         }
 
-        function updateCartBar() {
+        function updateFloatingCart() {
             let totalCount = 0;
             let totalPrice = 0;
 
             Object.keys(cart).forEach(id => {
-                const p = productsData.find(item => item.id === id);
+                const p = productsData.find(i => i.id === id);
                 if (p) {
-                    const count = cart[id];
-                    totalCount += count;
-                    totalPrice += p.price * count;
+                    const c = cart[id];
+                    totalCount += c;
+                    totalPrice += p.price * c;
                 }
             });
 
             const cartBar = document.getElementById("cartBar");
-            const cartBadge = document.getElementById("cartBadge");
-            const cartTotalPrice = document.getElementById("cartTotalPrice");
+            const numBadge = document.getElementById("cartBadgeNum");
+            const priceVal = document.getElementById("cartPriceVal");
 
-            cartBadge.innerText = totalCount;
-            cartTotalPrice.innerText = `${totalPrice.toLocaleString("ru-RU")} so'm`;
+            numBadge.innerText = totalCount;
+            priceVal.innerText = `${totalPrice.toLocaleString("ru-RU")} so'm`;
 
             if (totalCount > 0) {
                 cartBar.classList.add("active");
@@ -626,18 +929,61 @@
         }
 
         function filterCategory(cat, btn) {
-            document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+            currentCategory = cat;
+            document.querySelectorAll(".cat-chip").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-            renderProducts(cat);
+            const searchVal = document.getElementById("searchInput").value;
+            renderProducts(cat, searchVal);
         }
 
-        // SEND ORDER TO TELEGRAM BOT
-        function sendOrderData() {
+        function handleSearch() {
+            const searchVal = document.getElementById("searchInput").value;
+            renderProducts(currentCategory, searchVal);
+        }
+
+        // CART MODAL LOGIC
+        function openCartModal() {
+            const list = document.getElementById("modalCartItemsList");
+            list.innerHTML = "";
+
+            let totalSum = 0;
+
+            Object.keys(cart).forEach(id => {
+                const p = productsData.find(i => i.id === id);
+                if (p) {
+                    const count = cart[id];
+                    const itemTotal = p.price * count;
+                    totalSum += itemTotal;
+
+                    const row = document.createElement("div");
+                    row.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);";
+                    row.innerHTML = `
+                        <div>
+                            <div style="font-weight: 800; font-size: 14px;">${p.name}</div>
+                            <div style="font-size: 12px; color: var(--gold-primary); margin-top: 2px;">${count} dona x ${p.priceStr} = ${itemTotal.toLocaleString("ru-RU")} so'm</div>
+                        </div>
+                        <div style="font-weight: 900; font-size: 15px;">${itemTotal.toLocaleString("ru-RU")} so'm</div>
+                    `;
+                    list.appendChild(row);
+                }
+            });
+
+            const backdrop = document.getElementById("cartModalBackdrop");
+            backdrop.classList.add("open");
+        }
+
+        function closeCartModal() {
+            const backdrop = document.getElementById("cartModalBackdrop");
+            backdrop.classList.remove("open");
+        }
+
+        // SUBMIT TO TELEGRAM BOT
+        function sendOrderToBot() {
             const items = [];
             let totalPrice = 0;
 
             Object.keys(cart).forEach(id => {
-                const p = productsData.find(item => item.id === id);
+                const p = productsData.find(i => i.id === id);
                 if (p) {
                     const count = cart[id];
                     const itemTotal = p.price * count;
@@ -657,14 +1003,16 @@
                 return;
             }
 
+            const comment = document.getElementById("orderComment").value || "Izoh yo'q";
+
             const payload = {
                 items: items,
                 total_price: totalPrice,
                 total_count: items.reduce((acc, i) => acc + i.count, 0),
-                date: new Date().toLocaleString()
+                comment: comment,
+                date: new Date().toLocaleString("uz-UZ")
             };
 
-            // Telegram WebApp sendData
             tg.sendData(JSON.stringify(payload));
         }
 
