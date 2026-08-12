@@ -357,10 +357,32 @@ async def show_about(message: Message):
 async def show_contact(message: Message):
     await message.answer("📞 <b>MEATBOX.UZ bilan bog'lanish:</b>\n\n📱 <b>Call-markaz:</b> +998 (95) 113-53-53\n💬 <b>Telegram Admin:</b> @meatbox_admin", reply_markup=get_main_keyboard())
 
+from aiohttp import web
+
+async def handle_healthcheck(request):
+    return web.Response(text="MEATBOX.UZ Telegram Bot is active and running 24/7 🚀")
+
+async def start_web_server():
+    port = int(os.getenv("PORT", 8080))
+    app = web.Application()
+    app.router.add_get("/", handle_healthcheck)
+    app.router.add_get("/health", handle_healthcheck)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logging.info(f"🌐 Railway HTTP Healthcheck server listening on port {port}")
+
 async def main():
     if not bot:
         return
-    print("🚀 MEATBOX.UZ Telegram boti va Mini App ko'prigi ishga tushirilmoqda...")
+    print("🚀 MEATBOX.UZ Telegram boti va 24/7 server ishga tushirilmoqda...")
+    
+    try:
+        asyncio.create_task(start_web_server())
+    except Exception as e:
+        logging.error(f"HTTP healthcheck server xatosi: {e}")
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
