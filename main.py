@@ -33,7 +33,6 @@ logging.basicConfig(level=logging.INFO)
 
 if not BOT_TOKEN or BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE" or ":" not in BOT_TOKEN:
     logging.error("\n⚠️ DIQQAT: Railway (yoki .env) parametrlarida BOT_TOKEN topilmadi yoki noto'g'ri!")
-    logging.error("Iltimos, Railway Dashboard -> Variables bo'limida BOT_TOKEN o'zgaruvchisini qo'shing!\n")
 
 # Telegram Bot va Dispatcher obyektlarini yaratish
 try:
@@ -75,20 +74,13 @@ PRODUCTS = {
     }
 }
 
-# Foydalanuvchilar savati (Xotirada saqlanadi): {user_id: {product_id: count}}
 user_carts = {}
 
-# =====================================================================
-# FSM SHAKLLARI (Buyurtma berish bosqichlari)
-# =====================================================================
 class OrderState(StatesGroup):
     waiting_for_phone = State()
     waiting_for_location = State()
     confirm_order = State()
 
-# =====================================================================
-# TUGMALAR (KEYBOARDS)
-# =====================================================================
 def get_main_keyboard():
     kb = [
         [KeyboardButton(text="🛍 Menyu va Buyurtma (Mini App)", web_app=WebAppInfo(url=WEB_APP_URL))],
@@ -131,9 +123,6 @@ def get_confirm_inline_keyboard():
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
-# =====================================================================
-# COMMAND HANDLERS
-# =====================================================================
 @dp.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
@@ -165,15 +154,22 @@ async def handle_web_app_data(message: Message):
     total_price = data.get("total_price", 0)
     total_count = data.get("total_count", 0)
     comment = data.get("comment", "Izoh yo'q")
+    customer = data.get("customer", {})
+
+    cust_name = customer.get("name", message.from_user.full_name)
+    cust_phone = customer.get("phone", "Ko'rsatilmadi")
+    cust_address = customer.get("address", "Olib ketish")
 
     if not items:
         await message.answer("🛒 Savat bo'sh bo'lgani uchun buyurtma qabul qilinmadi.")
         return
 
-    # 1. FOYDALANUVCHIGA CHEK SHAKLIDA XABAR TAYYORLASH
     receipt = (
         f"🎉 <b>BUYURTMANGIZ QABUL QILINDI! (Mini App)</b>\n\n"
         f"🆔 Buyurtma ID: <b>#MB-WA-{message.from_user.id}</b>\n"
+        f"👤 Mijoz: <b>{cust_name}</b>\n"
+        f"📱 Telefon: <code>{cust_phone}</code>\n"
+        f"📍 Manzil: <b>{cust_address}</b>\n"
         f"📅 Sana: <code>{data.get('date', 'Hozir')}</code>\n\n"
         f"📋 <b>BUYURTMA TARKIBI:</b>\n"
     )
@@ -193,11 +189,12 @@ async def handle_web_app_data(message: Message):
 
     await message.answer(receipt, reply_markup=get_main_keyboard())
 
-    # 2. ADMINGA XABAR YUBORISH (Agar ADMIN_ID ko'rsatilgan bo'lsa)
     if ADMIN_ID and ADMIN_ID.isdigit():
         admin_text = (
             f"🔔 <b>YANGI MINI APP BUYURTMA!</b>\n\n"
-            f"👤 <b>Mijoz:</b> {message.from_user.full_name} (@{message.from_user.username or 'yo_q'})\n"
+            f"👤 <b>Mijoz:</b> {cust_name} (@{message.from_user.username or 'yo_q'})\n"
+            f"📱 <b>Tel:</b> {cust_phone}\n"
+            f"📍 <b>Manzil:</b> {cust_address}\n"
             f"🆔 <b>Mijoz ID:</b> <code>{message.from_user.id}</code>\n\n"
             f"📋 <b>Tarkib:</b>\n"
         )
@@ -212,72 +209,44 @@ async def handle_web_app_data(message: Message):
         except Exception as err:
             logging.error(f"Adminga xabar yuborishda xatolik: {err}")
 
-# =====================================================================
-# BEKOR QILISH HANDLER
-# =====================================================================
 @dp.message(F.text == "❌ Bekor qilish")
 async def cancel_handler(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("❌ Amaliyot bekor qilindi. Asosiy menyu:", reply_markup=get_main_keyboard())
 
-# =====================================================================
-# MAHSULOTLAR BO'LIMI
-# =====================================================================
 @dp.message(F.text.startswith("🥩 Mahsulotlar"))
 async def show_products(message: Message):
     await message.answer("🥩 <b>MEATBOX.UZ Premium Setlar ro'yxati:</b>")
-    
     for prod_id, prod in PRODUCTS.items():
         caption = (
             f"<b>{prod['name']}</b>\n\n"
             f"📝 <b>Tavsif:</b> {prod['description']}\n\n"
             f"💰 <b>Narxi:</b> <code>{prod['price_formatted']}</code>"
         )
-        await message.answer(
-            caption,
-            reply_markup=get_product_inline_keyboard(prod_id)
-        )
+        await message.answer(caption, reply_markup=get_product_inline_keyboard(prod_id))
 
-# =====================================================================
-# SAVATGA QO'SHISH CALLBACK
-# =====================================================================
 @dp.callback_query(F.data.startswith("add_cart:"))
 async def add_to_cart_callback(callback: CallbackQuery):
     product_id = callback.data.split(":")[1]
     user_id = callback.from_user.id
-    
     if product_id not in PRODUCTS:
         await callback.answer("Mahsulot topilmadi!", show_alert=True)
         return
-        
     if user_id not in user_carts:
         user_carts[user_id] = {}
-        
     user_carts[user_id][product_id] = user_carts[user_id].get(product_id, 0) + 1
-    
-    product_name = PRODUCTS[product_id]["name"]
-    await callback.answer(f"✅ {product_name} savatga qo'shildi!", show_alert=False)
+    await callback.answer(f"✅ {PRODUCTS[product_id]['name']} savatga qo'shildi!", show_alert=False)
 
-# =====================================================================
-# SAVAT BO'LIMI
-# =====================================================================
 @dp.message(F.text == "🛒 Savat")
 async def show_cart(message: Message):
     user_id = message.from_user.id
     cart = user_carts.get(user_id, {})
-    
     if not cart or sum(cart.values()) == 0:
-        await message.answer(
-            "🛒 <b>Savatingiz bo'sh.</b>\n\n"
-            "Mahsulotlar bo'limidan yoki Mini App orqali setlarni tanlang!",
-            reply_markup=get_main_keyboard()
-        )
+        await message.answer("🛒 Savatingiz bo'sh.", reply_markup=get_main_keyboard())
         return
-        
     cart_text = "🛒 <b>Sizning savatingiz:</b>\n\n"
     total_price = 0
     item_num = 1
-    
     for prod_id, count in cart.items():
         if count > 0 and prod_id in PRODUCTS:
             prod = PRODUCTS[prod_id]
@@ -285,14 +254,9 @@ async def show_cart(message: Message):
             total_price += item_total
             cart_text += f"{item_num}. <b>{prod['name']}</b>\n   └ {count} dona x {prod['price_formatted']} = <b>{item_total:,} so'm</b>\n\n".replace(",", " ")
             item_num += 1
-            
     cart_text += f"💳 <b>Jami to'lov:</b> <code>{total_price:,} so'm</code>".replace(",", " ")
-    
     await message.answer(cart_text, reply_markup=get_cart_inline_keyboard())
 
-# =====================================================================
-# SAVATNI TOZALASH CALLBACK
-# =====================================================================
 @dp.callback_query(F.data == "clear_cart")
 async def clear_cart_callback(callback: CallbackQuery):
     user_id = callback.from_user.id
@@ -300,150 +264,52 @@ async def clear_cart_callback(callback: CallbackQuery):
     await callback.answer("🗑 Savat tozalandi!")
     await callback.message.edit_text("🛒 Savatingiz bo'shatildi.")
 
-# =====================================================================
-# BUYURTMA RASMIYLASHTIRISH (CHECKOUT)
-# =====================================================================
 @dp.callback_query(F.data == "checkout")
 async def start_checkout(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     cart = user_carts.get(user_id, {})
-    
     if not cart or sum(cart.values()) == 0:
         await callback.answer("Savatingiz bo'sh!", show_alert=True)
         return
-
     await callback.answer()
     await state.set_state(OrderState.waiting_for_phone)
-    await callback.message.answer(
-        "📱 Buyurtmani rasmiylashtirish uchun telefon raqamingizni yuboring:\n"
-        "(Pastdagi <b>'📱 Telefon raqamni yuborish'</b> tugmasini bosing yoki qo'lda kiriting)",
-        reply_markup=get_phone_keyboard()
-    )
+    await callback.message.answer("📱 Telefon raqamingizni yuboring:", reply_markup=get_phone_keyboard())
 
-# TELEFON RAQAM QABUL QILISH
 @dp.message(OrderState.waiting_for_phone)
 async def process_phone(message: Message, state: FSMContext):
-    if message.contact:
-        phone = message.contact.phone_number
-    elif message.text and message.text != "❌ Bekor qilish":
-        phone = message.text
-    else:
-        await message.answer("Iltimos, telefon raqamingizni yuboring yoki kiriting:")
-        return
-        
+    phone = message.contact.phone_number if message.contact else message.text
     await state.update_data(phone=phone)
     await state.set_state(OrderState.waiting_for_location)
-    
-    await message.answer(
-        "📍 Buyurtmani yetkazib berish manzilini (geolokatsiyangizni) yuboring:\n"
-        "(Pastdagi <b>'📍 Geolokatsiyani yuborish'</b> tugmasini bosing yoki manzilni matn ko'rinishida yozing)",
-        reply_markup=get_location_keyboard()
-    )
+    await message.answer("📍 Manzilingizni yuboring:", reply_markup=get_location_keyboard())
 
-# GEOLOKATSIYA QABUL QILISH
 @dp.message(OrderState.waiting_for_location)
 async def process_location(message: Message, state: FSMContext):
-    if message.location:
-        lat = message.location.latitude
-        lon = message.location.longitude
-        location_info = f"https://maps.google.com/maps?q={lat},{lon}"
-    elif message.text and message.text != "❌ Bekor qilish":
-        location_info = message.text
-    else:
-        await message.answer("Iltimos, manzil yoki geolokatsiyangizni yuboring:")
-        return
-
+    location_info = f"https://maps.google.com/maps?q={message.location.latitude},{message.location.longitude}" if message.location else message.text
     await state.update_data(location=location_info)
     await state.set_state(OrderState.confirm_order)
-    
     data = await state.get_data()
-    user_id = message.from_user.id
-    cart = user_carts.get(user_id, {})
-    
-    order_summary = "📋 <b>BUYURTMA MA'LUMOTLARI:</b>\n\n"
-    total_price = 0
-    
-    for prod_id, count in cart.items():
-        if count > 0 and prod_id in PRODUCTS:
-            prod = PRODUCTS[prod_id]
-            item_total = prod["price"] * count
-            total_price += item_total
-            order_summary += f"• <b>{prod['name']}</b> x {count} = {item_total:,} so'm\n".replace(",", " ")
-            
-    order_summary += f"\n💳 <b>Jami:</b> <code>{total_price:,} so'm</code>\n".replace(",", " ")
-    order_summary += f"📞 <b>Telefon:</b> {data['phone']}\n"
-    order_summary += f"📍 <b>Manzil:</b> {data['location']}\n\n"
-    order_summary += "Buyurtmani tasdiqlaysizmi?"
-    
+    cart = user_carts.get(message.from_user.id, {})
+    order_summary = f"📋 <b>BUYURTMA:</b>\n\n📞 Tel: {data['phone']}\n📍 Manzil: {data['location']}\n"
     await message.answer(order_summary, reply_markup=get_confirm_inline_keyboard())
 
-# BUYURTMANI TASDIQLASH CALLBACK
 @dp.callback_query(F.data == "confirm_order", OrderState.confirm_order)
 async def confirm_order_callback(callback: CallbackQuery, state: FSMContext):
-    user_id = callback.from_user.id
-    
-    user_carts[user_id] = {}
+    user_carts[callback.from_user.id] = {}
     await state.clear()
-    
-    await callback.answer("Buyurtmangiz qabul qilindi!", show_alert=True)
-    
-    success_text = (
-        "🎉 <b>Buyurtmangiz muvaffaqiyatli qabul qilindi!</b>\n\n"
-        f"🆔 Buyurtma ID: <b>#MB-{user_id}</b>\n"
-        "⚡️ Operatorimiz tez orada siz bilan bog'lanib, buyurtmani tasdiqlaydi.\n\n"
-        "MEATBOX.UZ ni tanlaganingiz uchun rahmat! 🥩"
-    )
-    
-    await callback.message.edit_text(success_text)
+    await callback.answer("Buyurtmangiz qabul qilindi!")
+    await callback.message.edit_text("🎉 Buyurtmangiz qabul qilindi!")
     await callback.message.answer("Asosiy menyu:", reply_markup=get_main_keyboard())
 
-# BUYURTMANI BEKOR QILISH CALLBACK
-@dp.callback_query(F.data == "cancel_order", OrderState.confirm_order)
-async def cancel_order_callback(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
-    await callback.answer("Buyurtma bekor qilindi.")
-    await callback.message.edit_text("❌ Buyurtmangiz bekor qilindi.")
-    await callback.message.answer("Asosiy menyu:", reply_markup=get_main_keyboard())
-
-# =====================================================================
-# BIZ HAQIMIZDA BO'LIMI
-# =====================================================================
 @dp.message(F.text == "📍 Biz haqimizda")
 async def show_about(message: Message):
-    about_text = (
-        "🥩 <b>MEATBOX.UZ — Premium Go'sht Do'koni</b>\n\n"
-        "Biz sizga eng yangi, mramor va halol sertifikatiga ega bo'lgan mol va qo'y go'shtlarini taqdim etamiz.\n\n"
-        "✨ <b>Bizning afzalliklarimiz:</b>\n"
-        "• 100% Halol va Yangi go'sht\n"
-        "• Maxsus sovitgichli mashinalarda tezkor yetkazib berish\n"
-        "• Professionallar tomonidan tayyorlangan marinadlar\n"
-        "• Premium steyk va grill to'plamlari\n\n"
-        "📍 <b>Manzilimiz:</b> Toshkent sh., Chilonzor tumani, 10-mavze\n"
-        "⏰ <b>Ish vaqti:</b> Har kuni 09:00 dan 21:00 gacha"
-    )
-    await message.answer(about_text, reply_markup=get_main_keyboard())
+    await message.answer("🥩 <b>MEATBOX.UZ</b> — Premium Go'sht Do'koni\n100% Halol!", reply_markup=get_main_keyboard())
 
-# =====================================================================
-# ALOQA BO'LIMI
-# =====================================================================
 @dp.message(F.text == "📞 Aloqa")
 async def show_contact(message: Message):
-    contact_text = (
-        "📞 <b>MEATBOX.UZ bilan bog'lanish:</b>\n\n"
-        "📱 <b>Call-markaz:</b> +998 (71) 200-00-00\n"
-        "💬 <b>Telegram Admin:</b> @meatbox_admin\n"
-        "🌐 <b>Veb-sayt:</b> www.meatbox.uz\n"
-        "📱 <b>Instagram:</b> @meatbox.uz\n\n"
-        "❓ Savollaringiz yoki takliflaringiz bo'lsa, bemalol bizga murojaat qiling!"
-    )
-    await message.answer(contact_text, reply_markup=get_main_keyboard())
+    await message.answer("📞 Call-markaz: +998 (71) 200-00-00", reply_markup=get_main_keyboard())
 
-# =====================================================================
-# ASOSIY ISHGA TUSHIROVCHI FUNKSIYA
-# =====================================================================
 async def main():
     if not bot:
-        logging.error("❌ Bot obyekti yo'q. Dastur to'xtatiladi.")
         return
     print("🚀 MEATBOX.UZ Telegram boti va Mini App ko'prigi ishga tushirilmoqda...")
     await bot.delete_webhook(drop_pending_updates=True)
@@ -453,4 +319,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("🛑 Bot to'xtatildi.")
+        pass
