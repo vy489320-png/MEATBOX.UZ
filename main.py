@@ -25,21 +25,23 @@ from aiogram.types import (
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEB_APP_URL = os.getenv("WEB_APP_URL", "https://your-domain.vercel.app")
+WEB_APP_URL = os.getenv("WEB_APP_URL", "https://vy489320-png.github.io/MEATBOX.UZ/templates/index.html")
 ADMIN_ID = os.getenv("ADMIN_ID")
-
-if not BOT_TOKEN or BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE":
-    print("\n⚠️ DIQQAT: .env fayliga haqiqiy BOT_TOKEN qiymatini kiriting!\n")
 
 # Logging sozlamalari
 logging.basicConfig(level=logging.INFO)
 
+if not BOT_TOKEN or BOT_TOKEN == "YOUR_TELEGRAM_BOT_TOKEN_HERE" or ":" not in BOT_TOKEN:
+    logging.error("\n⚠️ DIQQAT: Railway (yoki .env) parametrlarida BOT_TOKEN topilmadi yoki noto'g'ri!")
+    logging.error("Iltimos, Railway Dashboard -> Variables bo'limida BOT_TOKEN o'zgaruvchisini qo'shing!\n")
+
 # Telegram Bot va Dispatcher obyektlarini yaratish
 try:
     from aiogram.client.default import DefaultBotProperties
-    bot = Bot(token=BOT_TOKEN or "DUMMY_TOKEN", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-except ImportError:
-    bot = Bot(token=BOT_TOKEN or "DUMMY_TOKEN", parse_mode=ParseMode.HTML)
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+except Exception as e:
+    logging.error(f"Bot obyektini yaratishda xatolik: {e}")
+    bot = None
 
 dp = Dispatcher(storage=MemoryStorage())
 
@@ -162,12 +164,13 @@ async def handle_web_app_data(message: Message):
     items = data.get("items", [])
     total_price = data.get("total_price", 0)
     total_count = data.get("total_count", 0)
+    comment = data.get("comment", "Izoh yo'q")
 
     if not items:
         await message.answer("🛒 Savat bo'sh bo'lgani uchun buyurtma qabul qilinmadi.")
         return
 
-    # 1. FOYDALANUVCHIGA CHEK SHAКLIDA XABAR TAYYORLASH
+    # 1. FOYDALANUVCHIGA CHEK SHAKLIDA XABAR TAYYORLASH
     receipt = (
         f"🎉 <b>BUYURTMANGIZ QABUL QILINDI! (Mini App)</b>\n\n"
         f"🆔 Buyurtma ID: <b>#MB-WA-{message.from_user.id}</b>\n"
@@ -182,7 +185,8 @@ async def handle_web_app_data(message: Message):
     total_formatted = f"{total_price:,}".replace(",", " ")
     receipt += (
         f"\n💳 <b>Jami to'lov:</b> <code>{total_formatted} so'm</code>\n"
-        f"📦 Total dona: <b>{total_count} ta</b>\n\n"
+        f"📦 Jami dona: <b>{total_count} ta</b>\n"
+        f"📝 <b>Izoh:</b> <i>{comment}</i>\n\n"
         f"⚡️ Operatorimiz tez orada siz bilan bog'lanadi.\n"
         f"MEATBOX.UZ ni tanlaganingiz uchun rahmat! 🥩"
     )
@@ -200,7 +204,8 @@ async def handle_web_app_data(message: Message):
         for item in items:
             admin_text += f"• {item['name']} - {item['count']} dona ({item['total']:,} so'm)\n".replace(",", " ")
         
-        admin_text += f"\n💳 <b>Jami summasi:</b> <code>{total_formatted} so'm</code>"
+        admin_text += f"\n💳 <b>Jami summasi:</b> <code>{total_formatted} so'm</code>\n"
+        admin_text += f"📝 <b>Izoh:</b> {comment}"
         
         try:
             await bot.send_message(chat_id=int(ADMIN_ID), text=admin_text)
@@ -437,6 +442,9 @@ async def show_contact(message: Message):
 # ASOSIY ISHGA TUSHIROVCHI FUNKSIYA
 # =====================================================================
 async def main():
+    if not bot:
+        logging.error("❌ Bot obyekti yo'q. Dastur to'xtatiladi.")
+        return
     print("🚀 MEATBOX.UZ Telegram boti va Mini App ko'prigi ishga tushirilmoqda...")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
