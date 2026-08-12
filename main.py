@@ -302,7 +302,14 @@ async def confirm_order_callback(callback: CallbackQuery, state: FSMContext):
 
 @dp.message(F.text == "📍 Biz haqimizda")
 async def show_about(message: Message):
-    await message.answer("🥩 <b>MEATBOX.UZ</b> — Premium Go'sht Do'koni\n100% Halol!", reply_markup=get_main_keyboard())
+    about_text = (
+        "🥩 <b>MEATBOX.UZ — Premium Go'sht Do'koni</b>\n\n"
+        "✨ 100% Halol va Yangi go'shtlar!\n\n"
+        "📍 <b>Do'kon manzili:</b> https://t.me/xasanqassob/367\n"
+        "📱 <b>Call-markaz:</b> +998 (95) 113-53-53\n"
+        "⏰ <b>Ish vaqti:</b> Har kuni 09:00 dan 21:00 gacha"
+    )
+    await message.answer(about_text, reply_markup=get_main_keyboard())
 
 @dp.message(F.text == "📞 Aloqa")
 async def show_contact(message: Message):
