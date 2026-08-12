@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MEATBOX.UZ — Premium Go'sht & Shashlik Delivery</title>
+
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --tg-bg: var(--telegram-bg-color, #0A0A0E);
+            --tg-card: var(--telegram-secondary-bg-color, #16161E);
+            --tg-text: var(--telegram-text-color, #FFFFFF);
+            --tg-hint: var(--telegram-hint-color, #9E9EA8);
+            
+            --ruby-primary: #D60A0A;
+            --ruby-grad: linear-gradient(135deg, #E50914 0%, #9B0000 100%);
+            
+            --gold-primary: #FFD700;
+            --gold-grad: linear-gradient(135deg, #FFD700 0%, #FFA800 100%);
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-gold: rgba(255, 215, 0, 0.25);
+            
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+
+            --shadow-glow: 0 0 20px rgba(214, 10, 10, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            padding-bottom: 120px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(214, 10, 10, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* HEADER */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 14, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 14px 16px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-box {
+            width: 42px;
+            height: 42px;
+            background: var(--ruby-grad);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: var(--shadow-glow);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .brand-title {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            background: var(--gold-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: var(--tg-hint);
+            font-weight: 500;
+            margin-top: 3px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon-mode {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            color: var(--tg-text);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* SEARCH BAR */
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            padding: 10px 16px 10px 40px;
+            border-radius: 14px;
+            color: var(--tg-text);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--gold-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--tg-hint);
+        }
+
+        /* CATEGORIES BAR */
+        .categories-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 14px 16px;
+            scrollbar-width: none;
+        }
+        .categories-bar::-webkit-scrollbar { display: none; }
+
+        .cat-tab {
+            background: var(--tg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--tg-hint);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .cat-tab.active {
+            background: var(--ruby-grad);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(214, 10, 10, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* PRODUCTS SECTION */
+        .products-section {
+            padding: 0 16px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px;
+        }
+
+        .product-card {
+            background: var(--tg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .product-card:active {
+            transform: scale(0.97);
+        }
+
+        .product-img-box {
+            position: relative;
+            width: 100%;
+            height: 130px;
+            background: #181822;
+            overflow: hidden;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.08);
+        }
+
+        .product-tag {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(10, 10, 14, 0.85);
+            border: 1px solid var(--border-gold);
+            color: var(--gold-primary);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+        }
+
+        .product-content {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+
+        .product-desc {
+            font-size: 11px;
+            color: var(--tg-hint);
+            line-height: 1.35;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .product-price {
+            font-size: 13.5px;
+            font-weight: 900;
+            color: var(--gold-primary);
+        }
+
+        /* COUNTER / ADD BUTTONS */
+        .btn-add-cart {
+            background: var(--ruby-grad);
+            color: #FFF;
+            border: none;
+            padding: 7px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(214, 10, 10, 0.35);
+        }
+
+        .counter-group {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 2px;
+        }
+
+        .btn-cnt {
+            background: var(--ruby-primary);
+            color: #FFF;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .cnt-val {
+            font-size: 13px;
+            font-weight: 800;
+            padding: 0 7px;
+        }
+
+        /* FLOATING CART BAR (Standard Web Browser Fallback) */
+        .floating-cart-bar {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            background: rgba(22, 22, 30, 0.95);
+            border: 1px solid var(--border-gold);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            z-index: 90;
+            transform: translateY(140px);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .floating-cart-bar.active {
+            transform: translateY(0);
+        }
+
+        .cart-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-badge-icon {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            background: var(--ruby-grad);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--gold-primary);
+            color: #000;
+            font-size: 11px;
+            font-weight: 900;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-total-price {
+            font-size: 15px;
+            font-weight: 900;
+            color: #FFF;
+        }
+
+        .btn-order-action {
+            background: var(--gold-grad);
+            color: #000;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        /* MODAL DRAWERS */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-drawer {
+            width: 100%;
+            max-height: 90vh;
+            background: #121218;
+            border-radius: 28px 28px 0 0;
+            border-top: 1px solid var(--border-gold);
+            padding: 24px 20px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-backdrop.open .modal-drawer {
+            transform: translateY(0);
+        }
+
+        .modal-pill {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* FORM INPUTS */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #FFF;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold-primary);
+        }
+
+        /* DELIVERY TYPE TOGGLE */
+        .delivery-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--tg-hint);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--ruby-grad);
+            color: #FFF;
+            box-shadow: 0 4px 12px rgba(214, 10, 10, 0.4);
+        }
+
+        .btn-location-geo {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px dashed var(--gold-primary);
+            color: var(--gold-primary);
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* CONTACT & FOOTER */
+        .footer-section {
+            margin-top: 32px;
+            padding: 20px 16px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .social-item {
+            color: var(--gold-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            background: rgba(255, 215, 0, 0.08);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER SECTION -->
+    <header class="header">
+        <div class="header-top">
+            <div class="brand-group">
+                <div class="logo-box">🥩</div>
+                <div>
+                    <div class="brand-title">MEATBOX.UZ</div>
+                    <div class="brand-sub">Halol Go'sht & Shashlik Delivery</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon-mode" onclick="openAdminAuthModal()">
+                    🔐 Admin
+                </button>
+            </div>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Shashlik, Steyk yoki Setlarni qidirish..." oninput="handleSearch()">
+        </div>
+    </header>
+
+    <!-- CATEGORIES TABS -->
+    <div class="categories-bar">
+        <button class="cat-tab active" onclick="filterCategory('all', this)">🔥 Barchasi</button>
+        <button class="cat-tab" onclick="filterCategory('shashlik', this)">🍢 Shashlik Setlar</button>
+        <button class="cat-tab" onclick="filterCategory('marinated', this)">🔥 Marinadlangan</button>
+        <button class="cat-tab" onclick="filterCategory('steaks', this)">🥩 Steyklar</button>
+        <button class="cat-tab" onclick="filterCategory('sauces', this)">🥫 Souslar</button>
+    </div>
+
+    <!-- PRODUCTS CATALOG -->
+    <main class="products-section">
+        <div class="products-grid" id="productGrid">
+            <!-- Dynamically populated -->
+        </div>
+    </main>
+
+    <!-- CONTACT & FOOTER SECTION -->
+    <footer class="footer-section">
+        <div style="font-weight: 800; font-size: 16px; margin-bottom: 4px;">🥩 MEATBOX.UZ Premium Supply</div>
+        <div style="font-size: 12px; color: var(--tg-hint);">Toshkent sh., Chilonzor tumani | 09:00 - 22:00</div>
+        
+        <div class="social-links">
+            <a href="https://instagram.com/meatbox.uz" target="_blank" class="social-item">📸 Instagram</a>
+            <a href="tel:+998712000000" class="social-item">📞 +998 (71) 200-00-00</a>
+            <a href="https://maps.google.com" target="_blank" class="social-item">📍 Xarita</a>
+        </div>
+    </footer>
+
+    <!-- FLOATING CART BAR (Browser Fallback) -->
+    <div class="floating-cart-bar" id="cartBar">
+        <div class="cart-bar-left">
+            <div class="cart-badge-icon">
+                🛒
+                <span class="badge-count" id="cartBadgeCount">0</span>
+            </div>
+            <div>
+                <div style="font-size: 11px; color: var(--tg-hint);">Jami buyurtma:</div>
+                <div class="cart-total-price" id="cartTotalPrice">0 so'm</div>
+            </div>
+        </div>
+        <button class="btn-order-action" onclick="openCheckoutModal()">
+            Buyurtma ➔
+        </button>
+    </div>
+
+    <!-- CHECKOUT MODAL DRAWER -->
+    <div class="modal-backdrop" id="checkoutModalBackdrop">
+        <div class="modal-drawer">
+            <div class="modal-pill"></div>
+            <div class="modal-title">
+                <span>📋 Buyurtma Berish</span>
+                <span style="font-size: 14px; cursor: pointer; color: var(--tg-hint);" onclick="closeCheckoutModal()">❌</span>
+            </div>
+
+            <!-- SELECTED ITEMS REVIEW -->
+            <div id="checkoutItemsReview" style="margin-bottom: 16px; max-height: 180px; overflow-y: auto;"></div>
+
+            <!-- DELIVERY TYPE TOGGLE -->
+            <div class="delivery-toggle">
+                <button class="toggle-btn active" id="btnTypeDelivery" onclick="setDeliveryType('delivery')">🚖 Yetkazish</button>
+                <button class="toggle-btn" id="btnTypePickup" onclick="setDeliveryType('pickup')">🏃‍♂️ Olib ketish</button>
+            </div>
+
+            <!-- CUSTOMER DETAILS FORM -->
+            <div class="form-group">
+                <label class="form-label">👤 Ism va Familiyangiz:</label>
+                <input type="text" id="custName" class="form-control" placeholder="Ismingizni kiriting...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📱 Telefon raqamingiz:</label>
+                <input type="tel" id="custPhone" class="form-control" placeholder="+998 90 123 45 67">
+            </div>
+
+            <div class="form-group" id="addressFormGroup">
+                <label class="form-label">📍 Yetkazib berish manzili / Mo'ljal:</label>
+                <button class="btn-location-geo" onclick="requestGeoLocation()">
+                    📍 Hozirgi geolokatsiyani aniqlash
+                </button>
+                <input type="text" id="custAddress" class="form-control" placeholder="Toshkent sh., Chilonzor 10, 15-uy...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📝 Buyurtmaga izoh (Ixtiyoriy):</label>
+                <input type="text" id="custComment" class="form-control" placeholder="Masalan: Achchiq sous ko'proq bo'lsin...">
+            </div>
+
+            <button class="btn-order-action" style="width: 100%; padding: 14px; margin-top: 10px; justify-content: center;" onclick="submitOrderToTelegram()">
+                🚀 Buyurtmani Tasdiqlash
+            </button>
+        </div>
+    </div>
+
+    <!-- ADMIN AUTH MODAL -->
+    <div class="modal-backdrop" id="adminAuthBackdrop">
+        <div class="modal-drawer">
+            <div class="modal-pill"></div>
+            <div class="modal-title">🔐 Admin Tizimiga Kirish</div>
+            
+            <div class="form-group">
+                <label class="form-label">Parolni kiriting (Standart: 1234):</label>
+                <input type="password" id="adminPassInput" class="form-control" placeholder="Parol...">
+            </div>
+
+            <button class="btn-order-action" style="width: 100%; padding: 12px;" onclick="verifyAdminPass()">Kirish ➔</button>
+            <button class="btn-icon-mode" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="closeAdminAuthModal()">Yopish</button>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL DRAWER -->
+    <div class="modal-backdrop" id="adminPanelBackdrop">
+        <div class="modal-drawer">
+            <div class="modal-pill"></div>
+            <div class="modal-title">
+                <span>⚙️ Admin Boshqaruv Paneli</span>
+                <span style="font-size: 14px; cursor: pointer;" onclick="closeAdminPanel()">❌</span>
+            </div>
+
+            <!-- ADD PRODUCT FORM -->
+            <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--border-gold);">
+                <div style="font-weight: 800; font-size: 14px; margin-bottom: 10px; color: var(--gold-primary);">➕ Yangi Mahsulot Qo'shish</div>
+                
+                <div class="form-group">
+                    <input type="text" id="newProdTitle" class="form-control" placeholder="Mahsulot nomi (masalan: Steyk Ribeye)...">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="newProdPrice" class="form-control" placeholder="Narxi (UZS)...">
+                </div>
+                <div class="form-group">
+                    <select id="newProdCat" class="form-control">
+                        <option value="shashlik">🍢 Shashlik Setlar</option>
+                        <option value="marinated">🔥 Marinadlangan go'shtlar</option>
+                        <option value="steaks">🥩 Steyklar</option>
+                        <option value="sauces">🥫 Souslar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="newProdImg" class="form-control" placeholder="Rasm URL havolasi...">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="newProdDesc" class="form-control" placeholder="Qisqa ta'rifi...">
+                </div>
+                <button class="btn-add-cart" style="width: 100%; padding: 10px;" onclick="addNewProductFromAdmin()">Qo'shish</button>
+            </div>
+
+            <!-- EXISTING PRODUCTS CONTROL -->
+            <div style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">📋 Mavjud Mahsulotlarni Boshqarish:</div>
+            <div id="adminProductList"></div>
+
+            <button class="btn-icon-mode" style="width: 100%; justify-content: center; margin-top: 16px; color: #FF4D4D;" onclick="resetCatalogToDefault()">
+                🔄 Katalogni Dastlabki Holatga Qaytarish
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // TELEGRAM WEBAPP INIT
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // INITIAL DEFAULT CATALOG
+        const INITIAL_PRODUCTS = [
+            {
+                id: "shash_1",
+                category: "shashlik",
+                title: "🍢 Qiyma & Gijduvon Shashlik Set",
+                desc: "10 dona qiyma shashlik, piyoz, maxsus sous va 2 dona patir non.",
+                price: 180000,
+                tag: "HIT SALE",
+                img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: "shash_2",
+                category: "shashlik",
+                title: "🍖 Mol Go'shti Kusok Shashlik (1kg)",
+                desc: "Eng saralangan mol lahmidan tayyorlangan marinadlangan shashlik.",
+                price: 220000,
+                tag: "PREMIUM",
+                img: "images/bbq_ribs.jpg"
+            },
+            {
+                id: "mar_1",
+                category: "marinated",
+                title: "🔥 Marinadlangan Mol Qovurg'a",
+                desc: "Maxsus firmaniy sousda marinad qilingan mol qovurg'alari (1.5 kg).",
+                price: 160000,
+                tag: "BBQ",
+                img: "images/bbq_ribs.jpg"
+            },
+            {
+                id: "mar_2",
+                category: "marinated",
+                title: "🍗 Marinadlangan Jo'ja (2 dona)",
+                desc: "Ziravorlar va sarimsoq bilan marinadlangan toza jo'ja go'shti.",
+                price: 110000,
+                tag: "SPECIAL",
+                img: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: "stk_1",
+                category: "steaks",
+                title: "🥩 Premium Tomahawk Steak",
+                desc: "Suyakli qirollik steyki (1.2 kg), ideal mramorlik darajasi.",
+                price: 240000,
+                tag: "EXCLUSIVE",
+                img: "images/steak_set.jpg"
+            },
+            {
+                id: "stk_2",
+                category: "steaks",
+                title: "🥩 Prime Ribeye Steak",
+                desc: "Juicy marble cut beef (1 kg / 3-4 dona steyk bo'lagi).",
+                price: 190000,
+                priceStr: "190 000 so'm",
+                tag: "BEST CHOICE",
+                img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: "sauce_1",
+                category: "sauces",
+                title: "🥫 Firmaniy Tomat Sousi",
+                desc: "Yangi pomidor, sarimsoq va ko'katlardan tayyorlangan maxsus sous.",
+                price: 15000,
+                tag: "SOUS",
+                img: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: "sauce_2",
+                category: "sauces",
+                title: "🌶 Spicy BBQ Cream Sous",
+                desc: "Achchiq va qaymoqli BBQ grill sousi (200g).",
+                price: 18000,
+                tag: "SPICY",
+                img: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+            }
+        ];
+
+        // LOAD CATALOG FROM LOCALSTORAGE OR FALLBACK
+        function getCatalog() {
+            const saved = localStorage.getItem("MEATBOX_CATALOG");
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e) {}
+            }
+            return INITIAL_PRODUCTS;
+        }
+
+        function saveCatalog(products) {
+            localStorage.setItem("MEATBOX_CATALOG", JSON.stringify(products));
+        }
+
+        // APP STATE
+        let catalog = getCatalog();
+        let cart = {};
+        let activeCategory = "all";
+        let deliveryType = "delivery";
+
+        // PREFILL USER DATA FROM TELEGRAM IF AVAILABLE
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const u = tg.initDataUnsafe.user;
+            const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ");
+            document.getElementById("custName").value = fullName;
+        }
+
+        // RENDER PRODUCTS
+        function renderProducts(cat = "all", query = "") {
+            const grid = document.getElementById("productGrid");
+            grid.innerHTML = "";
+
+            let filtered = catalog;
+
+            if (cat !== "all") {
+                filtered = filtered.filter(p => p.category === cat);
+            }
+
+            if (query.trim() !== "") {
+                const q = query.toLowerCase();
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--tg-hint); padding: 40px 0;">🔍 Mahsulot topilmadi</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const count = cart[p.id] || 0;
+                const card = document.createElement("div");
+                card.className = "product-card";
+
+                card.innerHTML = `
+                    <div class="product-img-box">
+                        <img src="${p.img}" alt="${p.title}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80'">
+                        <span class="product-tag">${p.tag || 'HALOL'}</span>
+                    </div>
+                    <div class="product-content">
+                        <div class="product-title">${p.title}</div>
+                        <div class="product-desc">${p.desc}</div>
+                        <div class="product-footer">
+                            <div class="product-price">${p.price.toLocaleString("ru-RU")} so'm</div>
+                            <div id="btn-box-${p.id}">
+                                ${renderButtonHTML(p.id, count)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderButtonHTML(id, count) {
+            if (count === 0) {
+                return `<button class="btn-add-cart" onclick="updateCart('${id}', 1)">+ Qo'shish</button>`;
+            }
+            return `
+                <div class="counter-group">
+                    <button class="btn-cnt" onclick="updateCart('${id}', -1)">-</button>
+                    <span class="cnt-val">${count}</span>
+                    <button class="btn-cnt" onclick="updateCart('${id}', 1)">+</button>
+                </div>
+            `;
+        }
+
+        function updateCart(id, delta) {
+            const current = cart[id] || 0;
+            const updated = current + delta;
+
+            if (updated <= 0) {
+                delete cart[id];
+            } else {
+                cart[id] = updated;
+            }
+
+            const box = document.getElementById(`btn-box-${id}`);
+            if (box) {
+                box.innerHTML = renderButtonHTML(id, cart[id] || 0);
+            }
+
+            updateCartUI();
+
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("light");
+            }
+        }
+
+        function updateCartUI() {
+            let totalCount = 0;
+            let totalPrice = 0;
+
+            Object.keys(cart).forEach(id => {
+                const p = catalog.find(i => i.id === id);
+                if (p) {
+                    const cnt = cart[id];
+                    totalCount += cnt;
+                    totalPrice += p.price * cnt;
+                }
+            });
+
+            // Update floating cart bar
+            const cartBar = document.getElementById("cartBar");
+            document.getElementById("cartBadgeCount").innerText = totalCount;
+            document.getElementById("cartTotalPrice").innerText = `${totalPrice.toLocaleString("ru-RU")} so'm`;
+
+            if (totalCount > 0) {
+                cartBar.classList.add("active");
+                // Telegram MainButton Integration
+                if (tg.MainButton) {
+                    tg.MainButton.setText(`BUYURTMA BERISH • ${totalPrice.toLocaleString("ru-RU")} SO'M`);
+                    tg.MainButton.show();
+                    tg.MainButton.onClick(openCheckoutModal);
+                }
+            } else {
+                cartBar.classList.remove("active");
+                if (tg.MainButton) {
+                    tg.MainButton.hide();
+                }
+            }
+        }
+
+        function filterCategory(cat, btn) {
+            activeCategory = cat;
+            document.querySelectorAll(".cat-tab").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const q = document.getElementById("searchInput").value;
+            renderProducts(cat, q);
+        }
+
+        function handleSearch() {
+            const q = document.getElementById("searchInput").value;
+            renderProducts(activeCategory, q);
+        }
+
+        // CHECKOUT & DELIVERY
+        function setDeliveryType(type) {
+            deliveryType = type;
+            document.getElementById("btnTypeDelivery").classList.toggle("active", type === "delivery");
+            document.getElementById("btnTypePickup").classList.toggle("active", type === "pickup");
+            
+            const addrGroup = document.getElementById("addressFormGroup");
+            if (type === "pickup") {
+                addrGroup.style.display = "none";
+            } else {
+                addrGroup.style.display = "block";
+            }
+        }
+
+        function requestGeoLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        document.getElementById("custAddress").value = `Geolokatsiya: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                        alert("Geolokatsiya olindi!");
+                    },
+                    err => {
+                        alert("Geolokatsiyani olishda xatolik yuz berdi. Manzilni matn shaklida yozing.");
+                    }
+                );
+            } else {
+                alert("Brauzeringiz geolokatsiyani qo'llab-quvvatlamaydi.");
+            }
+        }
+
+        function openCheckoutModal() {
+            const list = document.getElementById("checkoutItemsReview");
+            list.innerHTML = "";
+            let sum = 0;
+
+            Object.keys(cart).forEach(id => {
+                const p = catalog.find(i => i.id === id);
+                if (p) {
+                    const cnt = cart[id];
+                    const itemTotal = p.price * cnt;
+                    sum += itemTotal;
+
+                    const row = document.createElement("div");
+                    row.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;";
+                    row.innerHTML = `
+                        <div><b>${p.title}</b> x ${cnt}</div>
+                        <div style="color: var(--gold-primary); font-weight: 800;">${itemTotal.toLocaleString("ru-RU")} so'm</div>
+                    `;
+                    list.appendChild(row);
+                }
+            });
+
+            const totalRow = document.createElement("div");
+            totalRow.style.cssText = "display: flex; justify-content: space-between; font-weight: 900; font-size: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle);";
+            totalRow.innerHTML = `<div>Jami:</div><div style="color: var(--gold-primary);">${sum.toLocaleString("ru-RU")} so'm</div>`;
+            list.appendChild(totalRow);
+
+            document.getElementById("checkoutModalBackdrop").classList.add("open");
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById("checkoutModalBackdrop").classList.remove("open");
+        }
+
+        function submitOrderToTelegram() {
+            const name = document.getElementById("custName").value.trim();
+            const phone = document.getElementById("custPhone").value.trim();
+            const address = document.getElementById("custAddress").value.trim();
+            const comment = document.getElementById("custComment").value.trim() || "Izoh yo'q";
+
+            if (!name) { alert("Iltimos, ismingizni kiriting."); return; }
+            if (!phone) { alert("Iltimos, telefon raqamingizni kiriting."); return; }
+            if (deliveryType === "delivery" && !address) { alert("Iltimos, yetkazib berish manzilini kiriting."); return; }
+
+            const items = [];
+            let totalPrice = 0;
+
+            Object.keys(cart).forEach(id => {
+                const p = catalog.find(i => i.id === id);
+                if (p) {
+                    const cnt = cart[id];
+                    const itemTotal = p.price * cnt;
+                    totalPrice += itemTotal;
+                    items.push({
+                        id: p.id,
+                        name: p.title,
+                        price: p.price,
+                        count: cnt,
+                        total: itemTotal
+                    });
+                }
+            });
+
+            const payload = {
+                customer: {
+                    name: name,
+                    phone: phone,
+                    address: deliveryType === "delivery" ? address : "Olib ketish (Self-pickup)",
+                    delivery_type: deliveryType
+                },
+                items: items,
+                total_price: totalPrice,
+                total_count: items.reduce((a, b) => a + b.count, 0),
+                comment: comment,
+                date: new Date().toLocaleString("uz-UZ")
+            };
+
+            tg.sendData(JSON.stringify(payload));
+        }
+
+        // ADMIN PANEL & AUTH LOGIC
+        function openAdminAuthModal() {
+            document.getElementById("adminAuthBackdrop").classList.add("open");
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById("adminAuthBackdrop").classList.remove("open");
+        }
+
+        function verifyAdminPass() {
+            const pass = document.getElementById("adminPassInput").value;
+            if (pass === "1234") {
+                closeAdminAuthModal();
+                document.getElementById("adminPassInput").value = "";
+                openAdminPanel();
+            } else {
+                alert("❌ Parol noto'g'ri!");
+            }
+        }
+
+        function openAdminPanel() {
+            renderAdminProductList();
+            document.getElementById("adminPanelBackdrop").classList.add("open");
+        }
+
+        function closeAdminPanel() {
+            document.getElementById("adminPanelBackdrop").classList.remove("open");
+        }
+
+        function renderAdminProductList() {
+            const list = document.getElementById("adminProductList");
+            list.innerHTML = "";
+
+            catalog.forEach(p => {
+                const item = document.createElement("div");
+                item.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); padding: 10px; border-radius: 10px; margin-bottom: 8px;";
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight: 800; font-size: 13px;">${p.title}</div>
+                        <div style="font-size: 12px; color: var(--gold-primary);">${p.price.toLocaleString("ru-RU")} so'm</div>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn-icon-mode" onclick="editProductPrice('${p.id}')">✏️ Narx</button>
+                        <button class="btn-icon-mode" style="color: #FF4D4D;" onclick="deleteProduct('${p.id}')">🗑 Ochirish</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function addNewProductFromAdmin() {
+            const title = document.getElementById("newProdTitle").value.trim();
+            const price = parseInt(document.getElementById("newProdPrice").value);
+            const cat = document.getElementById("newProdCat").value;
+            const img = document.getElementById("newProdImg").value.trim() || "images/steak_set.jpg";
+            const desc = document.getElementById("newProdDesc").value.trim() || "Yangi taom";
+
+            if (!title || isNaN(price)) {
+                alert("Nomini va narxini kiriting!");
+                return;
+            }
+
+            const newProd = {
+                id: "custom_" + Date.now(),
+                category: cat,
+                title: title,
+                desc: desc,
+                price: price,
+                tag: "YANGI",
+                img: img
+            };
+
+            catalog.unshift(newProd);
+            saveCatalog(catalog);
+
+            // Reset inputs
+            document.getElementById("newProdTitle").value = "";
+            document.getElementById("newProdPrice").value = "";
+            document.getElementById("newProdDesc").value = "";
+
+            renderAdminProductList();
+            renderProducts(activeCategory);
+            alert("✅ Mahsulot qo'shildi va saqlandi!");
+        }
+
+        function editProductPrice(id) {
+            const p = catalog.find(i => i.id === id);
+            if (!p) return;
+
+            const newPriceStr = prompt(`"${p.title}" uchun yangi narxni kiriting (UZS):`, p.price);
+            if (newPriceStr !== null) {
+                const newPrice = parseInt(newPriceStr);
+                if (!isNaN(newPrice) && newPrice > 0) {
+                    p.price = newPrice;
+                    saveCatalog(catalog);
+                    renderAdminProductList();
+                    renderProducts(activeCategory);
+                }
+            }
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Ushbu mahsulotni o'chirishni tasdiqlaysizmi?")) {
+                catalog = catalog.filter(i => i.id !== id);
+                saveCatalog(catalog);
+                renderAdminProductList();
+                renderProducts(activeCategory);
+            }
+        }
+
+        function resetCatalogToDefault() {
+            if (confirm("Katalogni dastlabki holatga qaytarishni xohlaysizmi?")) {
+                localStorage.removeItem("MEATBOX_CATALOG");
+                catalog = [...INITIAL_PRODUCTS];
+                renderAdminProductList();
+                renderProducts(activeCategory);
+            }
+        }
+
+        // INITIAL RENDER
+        renderProducts("all");
+    </script>
+</body>
+</html>

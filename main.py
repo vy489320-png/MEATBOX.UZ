@@ -25,7 +25,7 @@ from aiogram.types import (
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-WEB_APP_URL = os.getenv("WEB_APP_URL", "https://vy489320-png.github.io/MEATBOX.UZ/templates/index.html")
+WEB_APP_URL = os.getenv("WEB_APP_URL", "https://vy489320-png.github.io/MEATBOX.UZ/")
 ADMIN_ID = os.getenv("ADMIN_ID")
 
 # Logging sozlamalari
