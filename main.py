@@ -306,7 +306,7 @@ async def show_about(message: Message):
 
 @dp.message(F.text == "📞 Aloqa")
 async def show_contact(message: Message):
-    await message.answer("📞 Call-markaz: +998 (71) 200-00-00", reply_markup=get_main_keyboard())
+    await message.answer("📞 <b>MEATBOX.UZ bilan bog'lanish:</b>\n\n📱 <b>Call-markaz:</b> +998 (95) 113-53-53\n💬 <b>Telegram Admin:</b> @meatbox_admin", reply_markup=get_main_keyboard())
 
 async def main():
     if not bot:
