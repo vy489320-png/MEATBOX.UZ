@@ -26,7 +26,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEB_APP_URL = os.getenv("WEB_APP_URL", "https://vy489320-png.github.io/MEATBOX.UZ/")
-ADMIN_ID = os.getenv("ADMIN_ID")
+ADMIN_ID = os.getenv("ADMIN_ID", "8593408047")
 
 # Logging sozlamalari
 logging.basicConfig(level=logging.INFO)
@@ -316,11 +316,31 @@ async def process_location(message: Message, state: FSMContext):
 
 @dp.callback_query(F.data == "confirm_order", OrderState.confirm_order)
 async def confirm_order_callback(callback: CallbackQuery, state: FSMContext):
-    user_carts[callback.from_user.id] = {}
+    data = await state.get_data()
+    user_id = callback.from_user.id
+    phone = data.get("phone", "Ko'rsatilmadi")
+    location_info = data.get("location", "Ko'rsatilmadi")
+
+    user_carts[user_id] = {}
     await state.clear()
     await callback.answer("Buyurtmangiz qabul qilindi!")
-    await callback.message.edit_text("🎉 Buyurtmangiz qabul qilindi!")
+    await callback.message.edit_text("🎉 Buyurtmangiz muvaffaqiyatli qabul qilindi!")
     await callback.message.answer("Asosiy menyu:", reply_markup=get_main_keyboard())
+
+    # Adminga Telegram orqali yuborish (8593408047)
+    admin_id_to_use = ADMIN_ID or "8593408047"
+    if admin_id_to_use and str(admin_id_to_use).isdigit():
+        admin_text = (
+            f"🔔 <b>YANGI BOT BUYURTMA!</b>\n\n"
+            f"👤 <b>Mijoz:</b> {callback.from_user.full_name} (@{callback.from_user.username or 'username_yoq'})\n"
+            f"📱 <b>Tel:</b> <code>{phone}</code>\n"
+            f"📍 <b>Manzil:</b> {location_info}\n"
+            f"🆔 <b>Mijoz ID:</b> <code>{user_id}</code>\n"
+        )
+        try:
+            await bot.send_message(chat_id=int(admin_id_to_use), text=admin_text)
+        except Exception as err:
+            logging.error(f"Adminga xabar yuborishda xatolik: {err}")
 
 @dp.message(F.text == "📍 Biz haqimizda")
 async def show_about(message: Message):
