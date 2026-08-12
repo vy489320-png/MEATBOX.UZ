@@ -164,12 +164,25 @@ async def handle_web_app_data(message: Message):
         await message.answer("🛒 Savat bo'sh bo'lgani uchun buyurtma qabul qilinmadi.")
         return
 
+    # Geolokatsiya koordinatalarini bossa ochiladigan havola (link) ga aylantirish
+    import re
+    formatted_address = cust_address
+    lat_coord, lon_coord = None, None
+    coords = re.findall(r"[-+]?\d+\.\d+", cust_address)
+    
+    if len(coords) >= 2:
+        lat_coord, lon_coord = coords[0], coords[1]
+        maps_link = f"https://maps.google.com/maps?q={lat_coord},{lon_coord}"
+        formatted_address = f'<a href="{maps_link}">📍 Xaritada ko\'rish ({lat_coord}, {lon_coord}) 🗺</a>'
+    elif cust_address.startswith("http://") or cust_address.startswith("https://"):
+        formatted_address = f'<a href="{cust_address}">📍 Manzil havolasi (Xaritada ochish) 🗺</a>'
+
     receipt = (
         f"🎉 <b>BUYURTMANGIZ QABUL QILINDI! (Mini App)</b>\n\n"
         f"🆔 Buyurtma ID: <b>#MB-WA-{message.from_user.id}</b>\n"
         f"👤 Mijoz: <b>{cust_name}</b>\n"
         f"📱 Telefon: <code>{cust_phone}</code>\n"
-        f"📍 Manzil: <b>{cust_address}</b>\n"
+        f"📍 Manzil: {formatted_address}\n"
         f"📅 Sana: <code>{data.get('date', 'Hozir')}</code>\n\n"
         f"📋 <b>BUYURTMA TARKIBI:</b>\n"
     )
@@ -189,12 +202,19 @@ async def handle_web_app_data(message: Message):
 
     await message.answer(receipt, reply_markup=get_main_keyboard())
 
+    # Native Location pin yuborish
+    if lat_coord and lon_coord:
+        try:
+            await message.answer_location(latitude=float(lat_coord), longitude=float(lon_coord))
+        except Exception as err:
+            logging.error(f"User location yuborishda xatolik: {err}")
+
     if ADMIN_ID and ADMIN_ID.isdigit():
         admin_text = (
             f"🔔 <b>YANGI MINI APP BUYURTMA!</b>\n\n"
             f"👤 <b>Mijoz:</b> {cust_name} (@{message.from_user.username or 'yo_q'})\n"
             f"📱 <b>Tel:</b> {cust_phone}\n"
-            f"📍 <b>Manzil:</b> {cust_address}\n"
+            f"📍 <b>Manzil:</b> {formatted_address}\n"
             f"🆔 <b>Mijoz ID:</b> <code>{message.from_user.id}</code>\n\n"
             f"📋 <b>Tarkib:</b>\n"
         )
@@ -206,6 +226,8 @@ async def handle_web_app_data(message: Message):
         
         try:
             await bot.send_message(chat_id=int(ADMIN_ID), text=admin_text)
+            if lat_coord and lon_coord:
+                await bot.send_location(chat_id=int(ADMIN_ID), latitude=float(lat_coord), longitude=float(lon_coord))
         except Exception as err:
             logging.error(f"Adminga xabar yuborishda xatolik: {err}")
 
