@@ -573,14 +573,14 @@
     <header class="header">
         <div class="header-top">
             <div class="brand-group">
-                <div class="logo-box">🥩</div>
+                <div class="logo-box" onclick="handleLogoClick()" title="MEATBOX">🥩</div>
                 <div>
                     <div class="brand-title">MEATBOX.UZ</div>
                     <div class="brand-sub">Halol Go'sht & Shashlik Delivery</div>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="btn-icon-mode" onclick="openAdminAuthModal()">
+                <button class="btn-icon-mode" id="adminHeaderBtn" style="display: none;" onclick="openAdminAuthModal()">
                     🔐 Admin
                 </button>
             </div>
@@ -1096,6 +1096,33 @@
 
             tg.sendData(JSON.stringify(payload));
         }
+
+        // ADMIN SECURITY CHECK (Faqat do'kon egasi - Telegram ID: 8593408047 uchun ko'rinadi)
+        const ADMIN_TELEGRAM_IDS = [8593408047, "8593408047"];
+
+        function checkAdminAccess() {
+            const adminBtn = document.getElementById("adminHeaderBtn");
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userId = tg.initDataUnsafe.user.id;
+                if (ADMIN_TELEGRAM_IDS.includes(userId) || ADMIN_TELEGRAM_IDS.includes(String(userId))) {
+                    if (adminBtn) adminBtn.style.display = "flex";
+                    return;
+                }
+            }
+            if (adminBtn) adminBtn.style.display = "none";
+        }
+
+        let logoTapCount = 0;
+        function handleLogoClick() {
+            logoTapCount++;
+            if (logoTapCount >= 3) {
+                logoTapCount = 0;
+                openAdminAuthModal();
+            }
+            setTimeout(() => { logoTapCount = 0; }, 2500);
+        }
+
+        checkAdminAccess();
 
         // ADMIN PANEL & AUTH LOGIC
         function openAdminAuthModal() {
