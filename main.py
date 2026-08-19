@@ -81,11 +81,15 @@ class OrderState(StatesGroup):
     waiting_for_location = State()
     confirm_order = State()
 
+class FeedbackState(StatesGroup):
+    waiting_for_feedback_text = State()
+
 def get_main_keyboard():
     kb = [
         [KeyboardButton(text="🛍 Menyu va Buyurtma (Mini App)", web_app=WebAppInfo(url=WEB_APP_URL))],
         [KeyboardButton(text="🥩 Mahsulotlar (Setlar)"), KeyboardButton(text="🛒 Savat")],
-        [KeyboardButton(text="📍 Biz haqimizda"), KeyboardButton(text="📞 Aloqa")]
+        [KeyboardButton(text="💬 Taklif va shikoyat"), KeyboardButton(text="📍 Biz haqimizda")],
+        [KeyboardButton(text="📞 Aloqa")]
     ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
@@ -136,18 +140,103 @@ async def cmd_start(message: Message, state: FSMContext):
     await message.answer(welcome_text, reply_markup=get_main_keyboard())
 
 # =====================================================================
+# LOCATION PARSER HELPER
+# =====================================================================
+def parse_location(address_text: str):
+    """
+    Manzildan koordinatalarni va Google / Yandex Maps havolalarini shakllantiruvchi yordamchi funksiya
+    """
+    if not address_text:
+        return "Ko'rsatilmadi", None, None
+
+    import re
+    lat_coord, lon_coord = None, None
+
+    # Check for Yandex Maps URL pattern
+    if "yandex" in address_text.lower() and "pt=" in address_text:
+        pt_match = re.search(r"pt=([0-9.]+)[,%2C]+([0-9.]+)", address_text)
+        if pt_match:
+            lon_coord, lat_coord = pt_match.group(1), pt_match.group(2)
+
+    # General Regex search for float numbers (latitude & longitude)
+    if not lat_coord or not lon_coord:
+        coords = re.findall(r"[-+]?\d+\.\d+", address_text)
+        if len(coords) >= 2:
+            c1, c2 = float(coords[0]), float(coords[1])
+            # Determine latitude (~35.0 to 46.0 in UZ) vs longitude (~55.0 to 75.0 in UZ)
+            if 35.0 <= c1 <= 46.0 and 55.0 <= c2 <= 75.0:
+                lat_coord, lon_coord = c1, c2
+            elif 35.0 <= c2 <= 46.0 and 55.0 <= c1 <= 75.0:
+                lat_coord, lon_coord = c2, c1
+            else:
+                lat_coord, lon_coord = c1, c2
+
+    if lat_coord is not None and lon_coord is not None:
+        lat_val = float(lat_coord)
+        lon_val = float(lon_coord)
+        maps_google = f"https://maps.google.com/maps?q={lat_val},{lon_val}"
+        maps_yandex = f"https://yandex.uz/maps/?pt={lon_val},{lat_val}&z=16&l=map"
+        formatted_html = (
+            f'<a href="{maps_google}">📍 Google Maps</a> | '
+            f'<a href="{maps_yandex}">🗺 Yandex Maps</a>\n'
+            f'<code>({lat_val:.5f}, {lon_val:.5f})</code>'
+        )
+        return formatted_html, lat_val, lon_val
+    elif address_text.startswith("http://") or address_text.startswith("https://"):
+        return f'<a href="{address_text}">📍 Manzil havolasi (Xaritada ochish) 🗺</a>', None, None
+    else:
+        return address_text, None, None
+
+# =====================================================================
 # WEB APP (MINI APP) DATA HANDLER
 # =====================================================================
 @dp.message(F.web_app_data)
 async def handle_web_app_data(message: Message):
-    """Mini App (index.html) dan sendData orqali kelgan buyurtma ma'lumotlarini qabul qilish"""
+    """Mini App (index.html) dan sendData orqali kelgan buyurtma yoki taklif/shikoyat ma'lumotlarini qabul qilish"""
     raw_data = message.web_app_data.data
     
     try:
         data = json.loads(raw_data)
     except Exception as e:
         logging.error(f"JSON parsing error: {e}")
-        await message.answer("❌ Buyurtma ma'lumotlarini o'qishda xatolik yuz berdi.")
+        await message.answer("❌ Ma'lumotlarni o'qishda xatolik yuz berdi.")
+        return
+
+    # TAKLIF VA SHIKOYATLARGA ISHLOV BERISH
+    if data.get("type") == "feedback":
+        feedback_label = data.get("feedback_type_label", "💬 Taklif / Shikoyat")
+        rating = data.get("rating", 5)
+        rating_stars = "⭐" * rating
+        product = data.get("product", "-- Umumiy --")
+        fb_message = data.get("message", "")
+        customer = data.get("customer", {})
+        cust_name = customer.get("name", message.from_user.full_name)
+        cust_phone = customer.get("phone", "Ko'rsatilmadi")
+        
+        reply_text = (
+            f"✅ <b>TAKLIF / SHIKOYATINGIZ QABUL QILINDI!</b>\n\n"
+            f"Fikringiz va e'tiboringiz uchun rahmat, <b>{cust_name}</b>!\n"
+            f"MEATBOX.UZ jamoasi har bir mijoz fikrini inobatga olgan holda xizmat va taomlar sifatini oshirish ustida ishlaydi. 🥩"
+        )
+        await message.answer(reply_text, reply_markup=get_main_keyboard())
+        
+        admin_id_to_use = ADMIN_ID or "8593408047"
+        if admin_id_to_use and str(admin_id_to_use).isdigit():
+            admin_text = (
+                f"📩 <b>YANGI TAKLIF / SHIKOYAT! (Mini App)</b>\n\n"
+                f"👤 <b>Mijoz:</b> {cust_name} (@{message.from_user.username or 'username_yoq'})\n"
+                f"📱 <b>Tel:</b> <code>{cust_phone}</code>\n"
+                f"🆔 <b>Mijoz ID:</b> <code>{message.from_user.id}</code>\n\n"
+                f"📌 <b>Turi:</b> <b>{feedback_label}</b>\n"
+                f"⭐ <b>Baholash:</b> {rating_stars} ({rating}/5)\n"
+                f"🥩 <b>Mahsulot:</b> {product}\n"
+                f"📅 <b>Sana:</b> <code>{data.get('date', 'Hozir')}</code>\n\n"
+                f"📝 <b>Matn:</b>\n<i>{fb_message}</i>"
+            )
+            try:
+                await bot.send_message(chat_id=int(admin_id_to_use), text=admin_text)
+            except Exception as err:
+                logging.error(f"Adminga taklif/shikoyat yuborishda xatolik: {err}")
         return
 
     items = data.get("items", [])
@@ -164,18 +253,8 @@ async def handle_web_app_data(message: Message):
         await message.answer("🛒 Savat bo'sh bo'lgani uchun buyurtma qabul qilinmadi.")
         return
 
-    # Geolokatsiya koordinatalarini bossa ochiladigan havola (link) ga aylantirish
-    import re
-    formatted_address = cust_address
-    lat_coord, lon_coord = None, None
-    coords = re.findall(r"[-+]?\d+\.\d+", cust_address)
-    
-    if len(coords) >= 2:
-        lat_coord, lon_coord = coords[0], coords[1]
-        maps_link = f"https://maps.google.com/maps?q={lat_coord},{lon_coord}"
-        formatted_address = f'<a href="{maps_link}">📍 Xaritada ko\'rish ({lat_coord}, {lon_coord}) 🗺</a>'
-    elif cust_address.startswith("http://") or cust_address.startswith("https://"):
-        formatted_address = f'<a href="{cust_address}">📍 Manzil havolasi (Xaritada ochish) 🗺</a>'
+    # Geolokatsiyani tahlil qilish
+    formatted_address, lat_coord, lon_coord = parse_location(cust_address)
 
     receipt = (
         f"🎉 <b>BUYURTMANGIZ QABUL QILINDI! (Mini App)</b>\n\n"
@@ -205,11 +284,11 @@ async def handle_web_app_data(message: Message):
     # Native Location pin yuborish
     if lat_coord and lon_coord:
         try:
-            await message.answer_location(latitude=float(lat_coord), longitude=float(lon_coord))
+            await message.answer_location(latitude=lat_coord, longitude=lon_coord)
         except Exception as err:
             logging.error(f"User location yuborishda xatolik: {err}")
 
-    if ADMIN_ID and ADMIN_ID.isdigit():
+    if ADMIN_ID and str(ADMIN_ID).isdigit():
         admin_text = (
             f"🔔 <b>YANGI MINI APP BUYURTMA!</b>\n\n"
             f"👤 <b>Mijoz:</b> {cust_name} (@{message.from_user.username or 'yo_q'})\n"
@@ -227,7 +306,7 @@ async def handle_web_app_data(message: Message):
         try:
             await bot.send_message(chat_id=int(ADMIN_ID), text=admin_text)
             if lat_coord and lon_coord:
-                await bot.send_location(chat_id=int(ADMIN_ID), latitude=float(lat_coord), longitude=float(lon_coord))
+                await bot.send_location(chat_id=int(ADMIN_ID), latitude=lat_coord, longitude=lon_coord)
         except Exception as err:
             logging.error(f"Adminga xabar yuborishda xatolik: {err}")
 
@@ -306,12 +385,22 @@ async def process_phone(message: Message, state: FSMContext):
 
 @dp.message(OrderState.waiting_for_location)
 async def process_location(message: Message, state: FSMContext):
-    location_info = f"https://maps.google.com/maps?q={message.location.latitude},{message.location.longitude}" if message.location else message.text
-    await state.update_data(location=location_info)
+    if message.location:
+        loc_str = f"{message.location.latitude}, {message.location.longitude}"
+    else:
+        loc_str = message.text or "Ko'rsatilmadi"
+
+    formatted_address, lat_coord, lon_coord = parse_location(loc_str)
+    
+    await state.update_data(
+        location_raw=loc_str,
+        formatted_address=formatted_address,
+        lat=lat_coord,
+        lon=lon_coord
+    )
     await state.set_state(OrderState.confirm_order)
     data = await state.get_data()
-    cart = user_carts.get(message.from_user.id, {})
-    order_summary = f"📋 <b>BUYURTMA:</b>\n\n📞 Tel: {data['phone']}\n📍 Manzil: {data['location']}\n"
+    order_summary = f"📋 <b>BUYURTMA HAQIDA:</b>\n\n📞 Tel: <code>{data.get('phone')}</code>\n📍 Manzil: {formatted_address}\n"
     await message.answer(order_summary, reply_markup=get_confirm_inline_keyboard())
 
 @dp.callback_query(F.data == "confirm_order", OrderState.confirm_order)
@@ -319,13 +408,21 @@ async def confirm_order_callback(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     user_id = callback.from_user.id
     phone = data.get("phone", "Ko'rsatilmadi")
-    location_info = data.get("location", "Ko'rsatilmadi")
+    formatted_address = data.get("formatted_address", "Ko'rsatilmadi")
+    lat_coord = data.get("lat")
+    lon_coord = data.get("lon")
 
     user_carts[user_id] = {}
     await state.clear()
     await callback.answer("Buyurtmangiz qabul qilindi!")
     await callback.message.edit_text("🎉 Buyurtmangiz muvaffaqiyatli qabul qilindi!")
     await callback.message.answer("Asosiy menyu:", reply_markup=get_main_keyboard())
+
+    if lat_coord and lon_coord:
+        try:
+            await callback.message.answer_location(latitude=lat_coord, longitude=lon_coord)
+        except Exception as err:
+            logging.error(f"User location yuborishda xatolik: {err}")
 
     # Adminga Telegram orqali yuborish (8593408047)
     admin_id_to_use = ADMIN_ID or "8593408047"
@@ -334,13 +431,69 @@ async def confirm_order_callback(callback: CallbackQuery, state: FSMContext):
             f"🔔 <b>YANGI BOT BUYURTMA!</b>\n\n"
             f"👤 <b>Mijoz:</b> {callback.from_user.full_name} (@{callback.from_user.username or 'username_yoq'})\n"
             f"📱 <b>Tel:</b> <code>{phone}</code>\n"
-            f"📍 <b>Manzil:</b> {location_info}\n"
+            f"📍 <b>Manzil:</b> {formatted_address}\n"
             f"🆔 <b>Mijoz ID:</b> <code>{user_id}</code>\n"
         )
         try:
             await bot.send_message(chat_id=int(admin_id_to_use), text=admin_text)
+            if lat_coord and lon_coord:
+                await bot.send_location(chat_id=int(admin_id_to_use), latitude=lat_coord, longitude=lon_coord)
         except Exception as err:
             logging.error(f"Adminga xabar yuborishda xatolik: {err}")
+
+@dp.message(F.text == "💬 Taklif va shikoyat")
+async def start_feedback_handler(message: Message, state: FSMContext):
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📱 Mini App-da qoldirish", web_app=WebAppInfo(url=WEB_APP_URL))],
+        [InlineKeyboardButton(text="✍️ Telegram chatida yozib qoldirish", callback_data="feedback_chat_mode")]
+    ])
+    await message.answer(
+        "💬 <b>MEATBOX.UZ — Taklif va Shikoyatlar bo'limi</b>\n\n"
+        "Siz o'z taklif yoki shikoyatingizni <b>Mini App</b> (yulduzchalar va mahsulotni tanlash imkoni) orqali yoki to'g'ridan-to'g'ri <b>Telegram chatida</b> yozib qoldirishingiz mumkin.\n\n"
+        "👇 Qaysi usul sizga qulay?",
+        reply_markup=kb
+    )
+
+@dp.callback_query(F.data == "feedback_chat_mode")
+async def start_feedback_chat_callback(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await state.set_state(FeedbackState.waiting_for_feedback_text)
+    cancel_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="❌ Bekor qilish")]], resize_keyboard=True)
+    await callback.message.answer(
+        "✍️ <b>Taklif yoki shikoyatingizni batafsil yozib yuboring:</b>\n\n"
+        "(Xabaringiz to'g'ridan-to'g'ri do'kon rahbariyatiga yetkaziladi)",
+        reply_markup=cancel_kb
+    )
+
+@dp.message(FeedbackState.waiting_for_feedback_text)
+async def process_feedback_chat_text(message: Message, state: FSMContext):
+    if message.text == "❌ Bekor qilish":
+        await state.clear()
+        await message.answer("❌ Bekor qilindi. Asosiy menyu:", reply_markup=get_main_keyboard())
+        return
+
+    user_name = message.from_user.full_name
+    fb_text = message.text
+    await state.clear()
+
+    await message.answer(
+        f"✅ <b>Taklif va shikoyatingiz qabul qilindi!</b>\n\n"
+        f"MEATBOX.UZ jamoasi e'tiboringiz va yordamingiz uchun tashakkur bildiradi! 🥩",
+        reply_markup=get_main_keyboard()
+    )
+
+    admin_id_to_use = ADMIN_ID or "8593408047"
+    if admin_id_to_use and str(admin_id_to_use).isdigit():
+        admin_text = (
+            f"📩 <b>YANGI TAKLIF / SHIKOYAT! (Telegram Chat)</b>\n\n"
+            f"👤 <b>Mijoz:</b> {user_name} (@{message.from_user.username or 'username_yoq'})\n"
+            f"🆔 <b>Mijoz ID:</b> <code>{message.from_user.id}</code>\n\n"
+            f"📝 <b>Matn:</b>\n<i>{fb_text}</i>"
+        )
+        try:
+            await bot.send_message(chat_id=int(admin_id_to_use), text=admin_text)
+        except Exception as err:
+            logging.error(f"Adminga chat feedback yuborishda xatolik: {err}")
 
 @dp.message(F.text == "📍 Biz haqimizda")
 async def show_about(message: Message):

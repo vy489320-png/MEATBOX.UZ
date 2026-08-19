@@ -8,6 +8,10 @@
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -539,6 +543,11 @@
             gap: 6px;
         }
 
+        @keyframes mapPinPulse {
+            0% { transform: translate(-50%, -100%) scale(1); }
+            100% { transform: translate(-50%, -108%) scale(1.08); }
+        }
+
         /* CONTACT & FOOTER */
         .footer-section {
             margin-top: 32px;
@@ -565,6 +574,111 @@
             border-radius: 20px;
             border: 1px solid var(--border-gold);
         }
+
+        /* FEEDBACK / TAKLIF VA SHIKOYAT STYLES */
+        .btn-feedback-header {
+            background: rgba(255, 215, 0, 0.12);
+            border: 1px solid var(--border-gold);
+            color: var(--gold-primary);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-feedback-header:hover {
+            background: rgba(255, 215, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .feedback-type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .fb-type-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--tg-hint);
+            padding: 10px 6px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .fb-type-btn.active {
+            background: var(--ruby-grad);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(214, 10, 10, 0.4);
+        }
+
+        .star-rating-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+        }
+
+        .star-item {
+            font-size: 28px;
+            cursor: pointer;
+            filter: grayscale(100%);
+            opacity: 0.4;
+            transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+        }
+
+        .star-item.selected, .star-item:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .feedback-banner {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(214, 10, 10, 0.12) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            margin: 16px 16px 24px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .feedback-banner:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(214, 10, 10, 0.2) 100%);
+            transform: translateY(-1px);
+        }
+
+        .feedback-banner-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #FFF;
+            margin-bottom: 2px;
+        }
+
+        .feedback-banner-sub {
+            font-size: 11px;
+            color: var(--tg-hint);
+        }
     </style>
 </head>
 <body>
@@ -580,6 +694,9 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn-feedback-header" onclick="openFeedbackModal()">
+                    💬 Taklif & Shikoyat
+                </button>
                 <button class="btn-icon-mode" id="adminHeaderBtn" style="display: none;" onclick="openAdminAuthModal()">
                     🔐 Admin
                 </button>
@@ -609,6 +726,15 @@
         </div>
     </main>
 
+    <!-- FEEDBACK BANNER PROMO -->
+    <div class="feedback-banner" onclick="openFeedbackModal()">
+        <div>
+            <div class="feedback-banner-title">💬 Taklif yoki shikoyatingiz bormi?</div>
+            <div class="feedback-banner-sub">Xizmat va taomlar sifatini birgalikda yaxshilaylik. Fikringizni qoldiring!</div>
+        </div>
+        <div style="font-size: 20px; color: var(--gold-primary);">➡️</div>
+    </div>
+
     <!-- CONTACT & FOOTER SECTION -->
     <footer class="footer-section">
         <div style="font-weight: 800; font-size: 16px; margin-bottom: 4px;">🥩 MEATBOX.UZ Premium Supply</div>
@@ -617,6 +743,7 @@
         <div class="social-links">
             <a href="https://instagram.com/meatbox.uz" target="_blank" class="social-item">📸 Instagram</a>
             <a href="tel:+998951135353" class="social-item">📞 +998 (95) 113-53-53</a>
+            <a href="#" onclick="openFeedbackModal(); return false;" class="social-item">💬 Taklif & Shikoyat</a>
             <a href="https://t.me/xasanqassob/367" target="_blank" class="social-item">📍 Do'kon Manzili</a>
         </div>
     </footer>
@@ -669,9 +796,14 @@
 
             <div class="form-group" id="addressFormGroup">
                 <label class="form-label">📍 Yetkazib berish manzili / Mo'ljal:</label>
-                <button class="btn-location-geo" onclick="requestGeoLocation()">
-                    📍 Hozirgi geolokatsiyani aniqlash
-                </button>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button type="button" class="btn-location-geo" style="flex: 1; margin-bottom: 0;" onclick="requestGeoLocation()">
+                        📍 GPS aniqlash
+                    </button>
+                    <button type="button" class="btn-location-geo" style="flex: 1; margin-bottom: 0; background: rgba(214, 10, 10, 0.15); border-color: var(--ruby-primary); color: #FF4D4D;" onclick="openMapModal()">
+                        🗺 Xaritadan tanlash
+                    </button>
+                </div>
                 <input type="text" id="custAddress" class="form-control" placeholder="Toshkent sh., Chilonzor 10, 15-uy...">
             </div>
 
@@ -682,6 +814,101 @@
 
             <button class="btn-order-action" style="width: 100%; padding: 14px; margin-top: 10px; justify-content: center;" onclick="submitOrderToTelegram()">
                 🚀 Buyurtmani Tasdiqlash
+            </button>
+        </div>
+    </div>
+
+    <!-- MAP PICKER MODAL DRAWER -->
+    <div class="modal-backdrop" id="mapModalBackdrop" onclick="if(event.target===this) closeMapModal()">
+        <div class="modal-drawer" style="max-height: 92vh;">
+            <div class="modal-pill"></div>
+            <div class="modal-title">
+                <span>🗺 Manzilni Xaritadan Belgilash</span>
+                <span style="font-size: 16px; cursor: pointer; color: var(--tg-hint); padding: 4px;" onclick="closeMapModal()">❌</span>
+            </div>
+            
+            <div style="font-size: 12px; color: var(--tg-hint); margin-bottom: 10px; text-align: center;">
+                📍 Xaritaning markaziy qizil belgisi bo'yicha manzilingizni to'g'rilang
+            </div>
+
+            <div style="position: relative; width: 100%; height: 320px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-gold); margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                <div id="leafletMap" style="width: 100%; height: 100%; z-index: 1;"></div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; text-align: center;">
+                    <div style="font-size: 34px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); animation: mapPinPulse 1.5s infinite alternate;">📍</div>
+                </div>
+                <button type="button" onclick="requestGeoLocationForMap()" title="GPS Joylashuv" style="position: absolute; bottom: 14px; right: 14px; z-index: 1000; background: #16161E; color: var(--gold-primary); border: 1px solid var(--gold-primary); border-radius: 50%; width: 44px; height: 44px; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer;">
+                    🎯
+                </button>
+            </div>
+
+            <div id="mapAddressDisplay" style="background: rgba(255, 215, 0, 0.08); color: var(--tg-text); padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 14px; border: 1px solid var(--border-gold); line-height: 1.4;">
+                📍 Xaritaning markazini surib manzilingizni tanlang...
+            </div>
+
+            <button type="button" class="btn-order-action" style="width: 100%; padding: 14px; justify-content: center; font-size: 15px;" onclick="confirmMapLocation()">
+                ✅ Ushbu Manzilni Tasdiqlash
+            </button>
+        </div>
+    </div>
+
+    <!-- FEEDBACK & COMPLAINTS MODAL DRAWER -->
+    <div class="modal-backdrop" id="feedbackModalBackdrop">
+        <div class="modal-drawer">
+            <div class="modal-pill"></div>
+            <div class="modal-title">
+                <span>💬 Taklif va Shikoyatlar</span>
+                <span style="font-size: 14px; cursor: pointer; color: var(--tg-hint);" onclick="closeFeedbackModal()">❌</span>
+            </div>
+
+            <div style="font-size: 12px; color: var(--tg-hint); margin-bottom: 14px;">
+                Fikringiz biz uchun juda muhim! Taomlarimiz va xizmatimiz sifatini oshirish bo'yicha taklif yoki shikoyatingiz bo'lsa qoldiring.
+            </div>
+
+            <!-- FEEDBACK TYPE TOGGLE -->
+            <label class="form-label">📌 Xabar turi:</label>
+            <div class="feedback-type-grid">
+                <button class="fb-type-btn active" id="fbTypeTaklif" onclick="setFeedbackType('taklif')">💡 Taklif</button>
+                <button class="fb-type-btn" id="fbTypeShikoyat" onclick="setFeedbackType('shikoyat')">⚠️ Shikoyat</button>
+                <button class="fb-type-btn" id="fbTypeBaholash" onclick="setFeedbackType('baholash')">⭐ Baholash</button>
+            </div>
+
+            <!-- RATING STARS -->
+            <label class="form-label">⭐ Xizmatni baholang:</label>
+            <div class="star-rating-box">
+                <span class="star-item selected" onclick="setFeedbackRating(1)">⭐</span>
+                <span class="star-item selected" onclick="setFeedbackRating(2)">⭐</span>
+                <span class="star-item selected" onclick="setFeedbackRating(3)">⭐</span>
+                <span class="star-item selected" onclick="setFeedbackRating(4)">⭐</span>
+                <span class="star-item selected" onclick="setFeedbackRating(5)">⭐</span>
+            </div>
+
+            <!-- PRODUCT SELECT (OPTIONAL) -->
+            <div class="form-group">
+                <label class="form-label">🥩 Mahsulot (Ixtiyoriy):</label>
+                <select id="fbProductSelect" class="form-control">
+                    <option value="barchasi">-- Umumiy xizmat ko'rsatish --</option>
+                </select>
+            </div>
+
+            <!-- CUSTOMER DETAILS -->
+            <div class="form-group">
+                <label class="form-label">👤 Ismingiz:</label>
+                <input type="text" id="fbCustName" class="form-control" placeholder="Ismingizni kiriting...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📱 Telefon raqamingiz:</label>
+                <input type="tel" id="fbCustPhone" class="form-control" placeholder="+998 90 123 45 67">
+            </div>
+
+            <!-- MESSAGE TEXTAREA -->
+            <div class="form-group">
+                <label class="form-label">📝 Taklif yoki shikoyatingiz mazmuni:</label>
+                <textarea id="fbCustMessage" class="form-control" rows="4" style="resize: vertical; min-height: 80px;" placeholder="Batafsil fikr yoki e'tirozingizni yozing..."></textarea>
+            </div>
+
+            <button class="btn-order-action" style="width: 100%; padding: 14px; margin-top: 6px; justify-content: center;" onclick="submitFeedbackToTelegram()">
+                🚀 Xabarni Yuborish
             </button>
         </div>
     </div>
@@ -999,22 +1226,247 @@
             }
         }
 
-        function requestGeoLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        const lat = pos.coords.latitude;
-                        const lon = pos.coords.longitude;
-                        document.getElementById("custAddress").value = `Geolokatsiya: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                        alert("Geolokatsiya olindi!");
-                    },
-                    err => {
-                        alert("Geolokatsiyani olishda xatolik yuz berdi. Manzilni matn shaklida yozing.");
+        let currentLat = null;
+        let currentLon = null;
+        let leafletMapObj = null;
+        let selectedMapLat = 41.311081; // Default Tashkent
+        let selectedMapLon = 69.240562;
+
+        function reverseGeocode(lat, lon, callback) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=uz,ru`;
+            fetch(url, { headers: { 'User-Agent': 'MeatboxApp/1.0' } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const a = data.address;
+                        const road = a.road || a.pedestrian || a.suburb || a.neighbourhood || '';
+                        const house = a.house_number ? `${a.house_number}-uy` : '';
+                        const city = a.city || a.town || a.county || 'Toshkent';
+                        const parts = [city, road, house].filter(Boolean);
+                        const displayAddr = parts.join(', ') || data.display_name || '';
+                        callback(displayAddr);
+                    } else {
+                        callback(null);
                     }
-                );
-            } else {
-                alert("Brauzeringiz geolokatsiyani qo'llab-quvvatlamaydi.");
+                })
+                .catch(err => {
+                    console.error("Reverse geocoding error:", err);
+                    callback(null);
+                });
+        }
+
+        function requestGeoLocation() {
+            const btn = document.querySelector(".btn-location-geo");
+            let statusDiv = document.getElementById("geoStatusMsg");
+            if (!statusDiv) {
+                statusDiv = document.createElement("div");
+                statusDiv.id = "geoStatusMsg";
+                statusDiv.style.cssText = "font-size: 12px; margin-top: 6px; font-weight: 700; text-align: center;";
+                const addrGroup = document.getElementById("addressFormGroup");
+                if (addrGroup) addrGroup.appendChild(statusDiv);
             }
+
+            if (btn) btn.innerHTML = "⏳ GPS izlanmoqda...";
+            statusDiv.style.color = "var(--gold-primary)";
+            statusDiv.innerText = "📍 GPS joylashuv koordinatalari olinmoqda...";
+
+            let geoHandled = false;
+
+            function applyLoc(lat, lon, src) {
+                if (geoHandled) return;
+                geoHandled = true;
+                currentLat = parseFloat(lat);
+                currentLon = parseFloat(lon);
+                
+                const addressInput = document.getElementById("custAddress");
+                const latFixed = currentLat.toFixed(6);
+                const lonFixed = currentLon.toFixed(6);
+
+                if (btn) btn.innerHTML = "✅ GPS olindi!";
+                statusDiv.style.color = "#4DEE86";
+                statusDiv.innerHTML = `✅ GPS olindi! <code>${latFixed}, ${lonFixed}</code>`;
+
+                reverseGeocode(currentLat, currentLon, (addrText) => {
+                    if (addrText) {
+                        addressInput.value = `${addrText} (https://maps.google.com/maps?q=${latFixed},${lonFixed})`;
+                        statusDiv.innerHTML = `✅ Manzil: <b>${addrText}</b><br><small style="color:var(--tg-hint)">(${latFixed}, ${lonFixed})</small>`;
+                    } else {
+                        addressInput.value = `https://maps.google.com/maps?q=${latFixed},${lonFixed} (${latFixed}, ${lonFixed})`;
+                    }
+                });
+
+                if (leafletMapObj) {
+                    leafletMapObj.setView([currentLat, currentLon], 16);
+                    selectedMapLat = currentLat;
+                    selectedMapLon = currentLon;
+                    updateMapAddressDisplay(currentLat, currentLon);
+                }
+            }
+
+            function handleGeoFailure(errMsg) {
+                if (geoHandled) return;
+                geoHandled = true;
+                console.warn("Geo error:", errMsg);
+                if (btn) btn.innerHTML = "📍 GPS aniqlash";
+                statusDiv.style.color = "#FFD700";
+                statusDiv.innerHTML = "⚠️ GPS aniqlanmadi. 🗺 Xaritadan tanlash oynasi ochilmoqda...";
+                setTimeout(() => {
+                    openMapModal();
+                }, 600);
+            }
+
+            // 1. Try Telegram WebApp LocationManager (Bot API 7.0+)
+            const tg = window.Telegram && window.Telegram.WebApp;
+            const lm = tg && tg.LocationManager;
+
+            if (lm) {
+                const fetchLM = () => {
+                    if (lm.isLocationAvailable) {
+                        lm.getLocation((data) => {
+                            if (data && data.latitude && data.longitude) {
+                                applyLoc(data.latitude, data.longitude, "Telegram LM");
+                            } else {
+                                fallbackToHTML5();
+                            }
+                        });
+                    } else {
+                        fallbackToHTML5();
+                    }
+                };
+
+                try {
+                    if (lm.isInited) {
+                        fetchLM();
+                    } else {
+                        lm.init(() => fetchLM());
+                        setTimeout(() => {
+                            if (!geoHandled) fallbackToHTML5();
+                        }, 2000);
+                    }
+                } catch(e) {
+                    console.error("LocationManager error:", e);
+                    fallbackToHTML5();
+                }
+            } else {
+                fallbackToHTML5();
+            }
+
+            // 2. HTML5 Geolocation with fallback
+            function fallbackToHTML5() {
+                if (!navigator.geolocation) {
+                    handleGeoFailure("Geolocation unsupported");
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    pos => applyLoc(pos.coords.latitude, pos.coords.longitude, "HTML5 Fast"),
+                    err1 => {
+                        navigator.geolocation.getCurrentPosition(
+                            pos => applyLoc(pos.coords.latitude, pos.coords.longitude, "HTML5 High"),
+                            err2 => handleGeoFailure(err2.message),
+                            { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+                        );
+                    },
+                    { enableHighAccuracy: false, timeout: 7000, maximumAge: 60000 }
+                );
+            }
+        }
+
+        function openMapModal() {
+            const backdrop = document.getElementById("mapModalBackdrop");
+            if (backdrop) backdrop.classList.add("active");
+
+            setTimeout(() => {
+                const startLat = currentLat || selectedMapLat || 41.311081;
+                const startLon = currentLon || selectedMapLon || 69.240562;
+                selectedMapLat = startLat;
+                selectedMapLon = startLon;
+
+                if (!leafletMapObj) {
+                    leafletMapObj = L.map('leafletMap', {
+                        zoomControl: true,
+                        attributionControl: false
+                    }).setView([startLat, startLon], 16);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19
+                    }).addTo(leafletMapObj);
+
+                    leafletMapObj.on('moveend', function() {
+                        const center = leafletMapObj.getCenter();
+                        selectedMapLat = center.lat;
+                        selectedMapLon = center.lng;
+                        updateMapAddressDisplay(selectedMapLat, selectedMapLon);
+                    });
+                } else {
+                    leafletMapObj.invalidateSize();
+                    leafletMapObj.setView([startLat, startLon], 16);
+                }
+
+                updateMapAddressDisplay(startLat, startLon);
+            }, 250);
+        }
+
+        function closeMapModal() {
+            const backdrop = document.getElementById("mapModalBackdrop");
+            if (backdrop) backdrop.classList.remove("active");
+        }
+
+        function requestGeoLocationForMap() {
+            const disp = document.getElementById("mapAddressDisplay");
+            if (disp) disp.innerHTML = "⏳ Joylashuv aniqlanmoqda...";
+            requestGeoLocation();
+            setTimeout(() => {
+                if (currentLat && currentLon && leafletMapObj) {
+                    leafletMapObj.setView([currentLat, currentLon], 16);
+                    updateMapAddressDisplay(currentLat, currentLon);
+                }
+            }, 1500);
+        }
+
+        function updateMapAddressDisplay(lat, lon) {
+            const disp = document.getElementById("mapAddressDisplay");
+            if (!disp) return;
+            disp.innerHTML = `⏳ Manzil aniqlanmoqda... <small style="color:var(--tg-hint)">(${lat.toFixed(5)}, ${lon.toFixed(5)})</small>`;
+            reverseGeocode(lat, lon, (addrText) => {
+                if (addrText) {
+                    disp.innerHTML = `📍 <b>${addrText}</b><br><small style="color:var(--tg-hint)">(${lat.toFixed(5)}, ${lon.toFixed(5)})</small>`;
+                } else {
+                    disp.innerHTML = `📍 <b>Koordinatalar:</b> ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                }
+            });
+        }
+
+        function confirmMapLocation() {
+            currentLat = selectedMapLat;
+            currentLon = selectedMapLon;
+            const latFixed = currentLat.toFixed(6);
+            const lonFixed = currentLon.toFixed(6);
+            const addressInput = document.getElementById("custAddress");
+            
+            let statusDiv = document.getElementById("geoStatusMsg");
+            if (!statusDiv) {
+                statusDiv = document.createElement("div");
+                statusDiv.id = "geoStatusMsg";
+                statusDiv.style.cssText = "font-size: 12px; margin-top: 6px; font-weight: 700; text-align: center;";
+                const addrGroup = document.getElementById("addressFormGroup");
+                if (addrGroup) addrGroup.appendChild(statusDiv);
+            }
+
+            statusDiv.style.color = "#4DEE86";
+            statusDiv.innerHTML = "⏳ Manzil tasdiqlanmoqda...";
+
+            reverseGeocode(currentLat, currentLon, (addrText) => {
+                if (addrText) {
+                    addressInput.value = `${addrText} (https://maps.google.com/maps?q=${latFixed},${lonFixed})`;
+                    statusDiv.innerHTML = `✅ Xaritadan manzil tanlandi: <b>${addrText}</b>`;
+                } else {
+                    addressInput.value = `https://maps.google.com/maps?q=${latFixed},${lonFixed} (${latFixed}, ${lonFixed})`;
+                    statusDiv.innerHTML = `✅ Geolokatsiya olindi! <code>${latFixed}, ${lonFixed}</code>`;
+                }
+            });
+
+            closeMapModal();
         }
 
         function openCheckoutModal() {
@@ -1081,6 +1533,7 @@
             });
 
             const payload = {
+                type: "order",
                 customer: {
                     name: name,
                     phone: phone,
@@ -1095,6 +1548,117 @@
             };
 
             tg.sendData(JSON.stringify(payload));
+        }
+
+        // =====================================================================
+        // FEEDBACK & COMPLAINTS (TAKLIF VA SHIKOYATLAR) LOGIC
+        // =====================================================================
+        let currentFbType = "taklif";
+        let currentFbRating = 5;
+
+        function openFeedbackModal(preselectedProduct = null) {
+            // Populate products select dropdown
+            const select = document.getElementById("fbProductSelect");
+            if (select) {
+                select.innerHTML = `<option value="barchasi">-- Umumiy xizmat ko'rsatish --</option>`;
+                catalog.forEach(p => {
+                    const opt = document.createElement("option");
+                    opt.value = p.title;
+                    opt.innerText = p.title;
+                    if (preselectedProduct && preselectedProduct === p.title) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            }
+
+            // Prefill user details
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const u = tg.initDataUnsafe.user;
+                const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ");
+                const nameInput = document.getElementById("fbCustName");
+                if (nameInput && !nameInput.value) {
+                    nameInput.value = fullName;
+                }
+            }
+
+            const phoneInput = document.getElementById("fbCustPhone");
+            const custPhoneInput = document.getElementById("custPhone");
+            if (phoneInput && custPhoneInput && custPhoneInput.value && !phoneInput.value) {
+                phoneInput.value = custPhoneInput.value;
+            }
+
+            document.getElementById("feedbackModalBackdrop").classList.add("open");
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById("feedbackModalBackdrop").classList.remove("open");
+        }
+
+        function setFeedbackType(type) {
+            currentFbType = type;
+            document.getElementById("fbTypeTaklif").classList.toggle("active", type === "taklif");
+            document.getElementById("fbTypeShikoyat").classList.toggle("active", type === "shikoyat");
+            document.getElementById("fbTypeBaholash").classList.toggle("active", type === "baholash");
+        }
+
+        function setFeedbackRating(stars) {
+            currentFbRating = stars;
+            const starItems = document.querySelectorAll(".star-rating-box .star-item");
+            starItems.forEach((star, index) => {
+                if (index < stars) {
+                    star.classList.add("selected");
+                } else {
+                    star.classList.remove("selected");
+                }
+            });
+        }
+
+        function submitFeedbackToTelegram() {
+            const name = document.getElementById("fbCustName").value.trim();
+            const phone = document.getElementById("fbCustPhone").value.trim();
+            const product = document.getElementById("fbProductSelect").value;
+            const message = document.getElementById("fbCustMessage").value.trim();
+
+            if (!message) {
+                alert("Iltimos, taklif yoki shikoyatingiz matnini kiriting.");
+                return;
+            }
+
+            const typeLabels = {
+                taklif: "💡 Taklif",
+                shikoyat: "⚠️ Shikoyat",
+                baholash: "⭐ Baholash"
+            };
+
+            const payload = {
+                type: "feedback",
+                feedback_type: currentFbType,
+                feedback_type_label: typeLabels[currentFbType] || "Fikr-mulohaza",
+                rating: currentFbRating,
+                product: product,
+                customer: {
+                    name: name || "Ko'rsatilmadi",
+                    phone: phone || "Ko'rsatilmadi"
+                },
+                message: message,
+                date: new Date().toLocaleString("uz-UZ")
+            };
+
+            if (tg && tg.sendData) {
+                try {
+                    tg.sendData(JSON.stringify(payload));
+                    closeFeedbackModal();
+                    document.getElementById("fbCustMessage").value = "";
+                } catch (e) {
+                    console.error("sendData error:", e);
+                    alert("✅ Taklif/shikoyatingiz qabul qilindi!");
+                    closeFeedbackModal();
+                }
+            } else {
+                alert("✅ Taklif/shikoyatingiz qabul qilindi! MEATBOX.UZ jamoasi e'tiboringiz uchun rahmat aytadi.");
+                closeFeedbackModal();
+            }
         }
 
         // ADMIN SECURITY CHECK (Faqat do'kon egasi - Telegram ID: 8593408047 uchun ko'rinadi)
